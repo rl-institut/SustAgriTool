@@ -22,6 +22,7 @@ urlpatterns = [
     path("users/", include("sustagri.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
+    path("steps/", include("sustagri.steps.urls", namespace="steps")),
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
