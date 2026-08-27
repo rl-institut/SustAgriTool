@@ -5,12 +5,14 @@ from django.http import HttpResponseRedirect
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 from .forms import *
 
 logger = logging.getLogger(__name__)
 
 
+@login_required
 def projects_list(request, proj_id=None):
     combined_projects_list = (
         # Project.objects.filter(Q(user=request.user) | Q(viewers__user__email=request.user.email))
