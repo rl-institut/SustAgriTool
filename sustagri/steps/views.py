@@ -1,7 +1,12 @@
-from django.shortcuts import render
+import logging
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
+from sustagri.projects.forms import *
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 STEPS = {
@@ -16,15 +21,29 @@ STEPS = {
 
 
 def project_information(request, proj_id):
+    project = get_object_or_404(Project, id=proj_id)
+    step_id = get_step_id("project_information")
+
+    if request.POST:
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(
+                reverse("steps:ogp_steps", args=[proj_id, step_id + 1])
+            )
+    else:
+        form = ProjectForm(instance=project)
+
     return render(
         request,
         "pages/project_information.html",
         {
             "proj_id": proj_id,
-            "step_id": 1,
-            "proj_name": "Dummy Project",
+            "step_id": step_id,
+            "proj_name": project.name,
             "page_information": "Project Information",
             "step_list": list(STEPS.values()),
+            "form": form,
         },
     )
 
@@ -69,4 +88,7 @@ def steps(request, proj_id, step_id=None):
             args=[proj_id],
         )
     )
+
+def get_step_id(step_name):
+    return list(STEPS.keys()).index(step_name) + 1
 

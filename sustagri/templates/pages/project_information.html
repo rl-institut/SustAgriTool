@@ -1,9 +1,24 @@
 {% extends "step_progression.html" %}
 
+{% load crispy_forms_tags %}
+{% load i18n %}
+
 {% block progression_content %}
 
 <h2>Project Information</h2>
 
-<p>This is where the project information form will go.</p>
+<form method="post" id="project-information-form">
+    {% csrf_token %}
+    {{ form | crispy }}
+</form>
 
 {% endblock progression_content %}
+
+{% block next_btn %}
+    <button id="next-button"
+            class="btn btn--medium"
+            type="submit"
+            form="project-information-form">
+        {% translate "Next" %}
+    </button>
+{% endblock next_btn %}

@@ -8,8 +8,8 @@ class Project(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
     # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     # options = models.ForeignKey(Options, on_delete=models.SET_NULL, null=True)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     altitude = models.FloatField(default=None, null=True, blank=True)
     # economic data?
 
