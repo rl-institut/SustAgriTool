@@ -1,0 +1,31 @@
+### ------ require_http_methods ------ ###
+
+def project_delete(request, proj_id):
+    project = get_object_or_404(Project, id=proj_id)
+
+    if request.method == "POST":
+        project.delete()
+        messages.success(request, "Project successfully deleted!")
+
+    return HttpResponseRedirect(reverse("projects_list"))
+
+But there is one thing I'd change: since deletion should only happen via POST,
+@require_http_methods(["POST"]) makes the intention explicit.
+
+Then you don't need the if anymore:
+
+@require_http_methods(["POST"])
+def project_delete(request, proj_id):
+    project = get_object_or_404(Project, id=proj_id)
+    project.delete()
+    messages.success(request, "Project successfully deleted!")
+    return HttpResponseRedirect(reverse("projects_list"))
+
+
+### -------- redirect vs. HttpResponseRedirect -------- ###
+
+return redirect("steps:project_information", proj_id=project.id)
+
+seems to be a simplification of
+
+return HttpResponseRedirect(reverse("steps:project_information", args=[project.id]))
