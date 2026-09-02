@@ -50,10 +50,20 @@ def projects_list(request, proj_id=None):
 def project_create(request):
     project = Project.objects.create()
 
-    return redirect(
-        "steps:project_information",
-        proj_id=project.id,
-    )
+    return HttpResponseRedirect(reverse("steps:project_information", args=[project.id]))
+
+
+def project_duplicate(request, proj_id):
+    project = get_object_or_404(Project, id=proj_id)
+
+    # user handling?
+
+    if request.method == "POST":
+        model_data = project.export()
+        new_project = Project(**model_data)
+        new_project.save()
+
+    return HttpResponseRedirect(reverse("projects:projects_list", args=[new_project.id]))
 
 
 def project_delete(request, proj_id):
@@ -66,4 +76,4 @@ def project_delete(request, proj_id):
         project.delete()
         messages.success(request, "Project successfully deleted!")
 
-    return HttpResponseRedirect(reverse("project_search"))
+    return HttpResponseRedirect(reverse("projects:projects_list"))

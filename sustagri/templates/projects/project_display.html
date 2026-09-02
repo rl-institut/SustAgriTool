@@ -57,6 +57,24 @@
                         </div>
                         <div class="actions">
 													  <!-- project actions will go here -->
+                            <form action="{% url 'projects:project_duplicate' project.id %}"
+                                  method="POST">
+                                {% csrf_token %}
+                                <!-- TODO change the ugly inline style-->
+                                <button style="margin-top:0.25rem;" class="btn btn--action action" type="submit" value="Duplicate">
+                                    <span class="icon icon-duplicate" aria-hidden="true"></span>
+                                    {% translate "Duplicate" %}
+                                </button>
+                            </form>
+                            <form action="{% url 'projects:project_delete' project.id %}"
+                                  method="POST">
+                                {% csrf_token %}
+                                <!-- TODO change the ugly inline style-->
+                                <button style="margin-top:0.25rem;" class="btn btn--action action" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete?' + '\n' +'This will also delete all related project data.')">
+                                    <span class="icon icon-delete" aria-hidden="true"></span>
+                                    {% translate "Delete" %}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
