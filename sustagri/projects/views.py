@@ -48,21 +48,12 @@ def projects_list(request, proj_id=None):
 
 
 def project_create(request):
-    if request.POST:
-        form = ProjectForm(request.POST)
-        if form.is_valid():
-            logger.info(f"Creating new project")
-            project = Project.objects.create(
-                name=form.cleaned_data["name"],
-                description=form.cleaned_data["description"],
-                longitude=form.cleaned_data["longitude"],
-                latitude=form.cleaned_data["latitude"],
-                # user=request.user,
-            )
-            return HttpResponseRedirect(reverse("steps:project_information", args=[project.id]))
-    else:
-        form = ProjectForm()
-    return render(request, "projects/project_create.html", {"form": form})
+    project = Project.objects.create()
+
+    return redirect(
+        "steps:project_information",
+        proj_id=project.id,
+    )
 
 
 def project_delete(request, proj_id):

@@ -39,7 +39,13 @@
                 <div>
                     <div class="project__top">
                         <a  href="{% url 'steps:project_information' project.id %}">
-                            <h2 class= "name"> {{ project.name }} </h2>
+                            <h2 class="name">
+                                {% if project.name %}
+                                    {{ project.name }}
+                                {% else %}
+                                    {% translate "Unnamed" %}
+                                {% endif %}
+                            </h2>
                         </a>
                     </div>
                     <div class="project__details">
