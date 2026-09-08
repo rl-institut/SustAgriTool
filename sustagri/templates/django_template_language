@@ -1,0 +1,128 @@
+# ------- Variables ---------
+
+My first name is {{ first_name }}. My last name is {{ last_name }}.
+With a context of {'first_name': 'John', 'last_name': 'Doe'}
+
+
+Dictionary lookup, attribute lookup and list-index lookups are implemented with a dot notation:
+
+{{ my_dict.key }}
+{{ my_object.attribute }}
+{{ my_list.0 }}
+
+Django automatically calls methods (or other callable objects) but arguments cannot be passed.
+All data should be prepared in views.py and just presented in template
+
+
+# ------- Filters ---------
+
+Filters transform the values of variables/values.
+
+{% url 'steps:ogp_steps' proj_id step_id|add:'-1' %}
+
+step_id|add:'-1'
+
+this manipulates the step_id
+
+
+# ------- Tags ---------
+Tags provide arbitrary logic in the rendering process.
+
+This definition is deliberately vague. For example, a tag can output content,
+serve as a control structure e.g. an “if” statement or a “for” loop,
+grab content from a database, or even enable access to other template tags.
+
+{% csrf_token %}
+
+Most tags accept arguments:
+
+{% cycle 'odd' 'even' %}
+
+Some tags require beginning and ending tags:
+
+{% if user.is_authenticated %}Hello, {{ user.username }}.{% endif %}
+
+
+
+# ------- Comments ---------
+
+{# this won't be rendered #}
+
+A {% comment %} tag provides multi-line comments. do I need another one to close it? -> {% endcomment %]
+
+<!-- das hier ist auch ein comment! -->
+
+
+# ------- Inheritance ---------
+
+{% extends "parent_template.html" %}
+
+always overrides {% block <unique_block_name> %} whatever {% endblock <unique_block_name> %}
+-> plain {% endblock %} is sufficient, but less readable
+
+can be nested with infinite number of levels
+
+{{ block.super }}  to get content from parent_template
+-> is this basically a reversed override?
+
+blocks inside if-tags are overridden regardless of true/false
+-> when does this matter?
+
+
+# ------ Template Partials ------
+
+reusable template fragments within a template file
+-> can be included in other templates using {% include "dir_with_temp/temp_with_partial.html" %}
+
+{% partialdef user-info %}
+    <div id="user-info-{{ user.username }}">
+        <h3>{{ user.name }}</h3>
+        <p>{{ user.bio }}</p>
+    </div>
+{% endpartialdef %}
+
+is then rendered with {% partial user-info %}
+
+or straight definition and rendering using {% partialdef user-info inline%} whatever {% endpartialdef %}
+-> can also be reused later with {% partial user-info %}
+
+direct access through a view:
+def user_info_partial(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    return render(request, "authors.html#user-info", {"user": user})
+-> only renders the partial, not the whole template (AJAX-style request -> HTMX is modern way of doing so)
+-> similarly possible with {% include "authors.html#user-info" %}
+
+context can be adapted to meet demands of partials:
+{% with user=featured_author %}
+    <h2>Featured Author of the Month</h2>
+    {% partial user-info %}
+{% endwith %}
+
+
+# ------ HTML escaping ------
+
+if user enters HTML code in forms, that may manipulate the template in an unwanted way
+-> django automatically escapes those by converting relevant symbols like <>
+-> still, manual HTML escaping through filters may be useful (check out later...)
+
+
+# ------ Accessing method calls ------
+
+calculations iwthin the templates is possible, but should generally happen within the views
+
+
+# ------ Custom tag and filter libraries ------
+
+django has a lot of inbuild functionality, for example {{ name|upper }} filter turns everything into upper case
+-> additional functionalities are available, but need to be imported (similar to libraries):
+
+INSTALLED_APPS = [
+    ...
+    "django.contrib.humanize",
+]
+
+then {% load humanize %}
+
+this could be relevant for defining custom components in the template!!
+

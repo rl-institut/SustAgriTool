@@ -1,0 +1,96 @@
+Django application
+        ▼
+1. Page architecture
+   How are pages organized?
+        ▼
+2. Reusable components
+   How do I avoid repeating HTML?
+        ▼
+3. Component styling
+   How do I keep the UI consistent?
+        ▼
+4. Layout & responsive design
+   How does the interface adapt to different screens?
+        ▼
+5. Dynamic interactions
+   How does the page change after it is rendered?
+        ▼
+6. Server communication
+   How does the browser communicate with Django?
+        ▼
+7. Client-side state
+   What does the browser need to remember?
+        ▼
+8. Complex frontend architecture
+   Do I need a full JavaScript application?
+
+
+# ----- 1+2 Template Architecture -----
+
+built-in: inheritance, include, partials
+
+django-cotton           https://django-cotton.com/
+slippers                https://mitchel.me/slippers/introduction/
+django-web-components   https://github.com/Xzya/django-web-components
+
+django-components       https://github.com/django-components/django-components
+
+BOTTOMLINE:
+- independent of styling & dynamic interactions (HTMX, Alpine.js) -> can all interchangeably be integrated
+- cotton/slippers/web-components are very much alike, all used to define structured and reusable components,
+    but cotton seems to be most popular/simple
+- built-in django features (especially partials) can do just as well as cotton if well organized
+- django-components used for defining components in back-end python code and directly including css/js there,
+    probably highest ceiling but also rather complex
+- transition, for example from partials to cotton, would be possible later
+
+-> use plain django (with partials and include) for now, but structure it in a component-like way
+    to be able to switch to cotton or even django-components later
+
+
+# ----- 3+4 Styling -----
+
+CSS/SCSS
+    - traditional design concept, write classes yourself
+
+Bootstrap/Bulma/Foundation
+    - predefined classes/styles, can be customized
+    - many more available, though not sure what else integrated well with django,
+        see: https://zairalabs.ai/guide/guides/css-ui-compared/
+
+Tailwind CSS
+    - middle ground between CSS (write it yourself) and Bootstrap/others (give me predefined, styled components)
+    - other libraries with predefined components on top of tailwind (for example DaisyUI, Flowbite)
+    - main alternative: UnoCSS (more flexible than Tailwind, see: https://dev.to/mapleleaf/tailwindcss-vs-unocss-2a53)
+    - other alternatives: Twind, Typewind, MasterCSS
+
+CSS Modules    https://css-tricks.com/css-modules-part-1-need/
+    dynamically generated classes, unique, mapped to the correct styles (local scope by default)
+
+Design Tokens   https://css-tricks.com/what-are-design-tokens/
+    method to store design variables (to be used in css for example) in one place in order to use it
+    across platforms and projects
+
+Component libraries can be built by combining a structured template architecture with styling,
+    eg. generating predefined buttons, modals and so on with cotton and tailwind
+
+bunch of options for responsive design incl.:
+tailwind responsive utilities
+media queries - responsive to screen size
+container queries - responsive container size (for example a button is rendered differently
+    depending whether it's in a small navbar or in the middle of a big block)
+-> media queries and container queries are both linked to native CSS,
+    but doesnt make them mutually exclusive with tailwind
+
+BOTTOMLINE:
+-> use Tailwind for now
+
+
+# ----- 5-8 Pie in the Sky -----
+
+HTMX
+Vanilla JavaScript
+Alpine.js
+Stimulus
+React / Vue / Svelte
+
