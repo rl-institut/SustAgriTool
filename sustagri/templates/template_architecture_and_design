@@ -1,3 +1,7 @@
+### --- Overview on template architecture and design --- ###
+
+BEWARE of things that are missing, not precise or even false
+
 Django application
         ▼
 1. Page architecture
@@ -57,6 +61,7 @@ Bootstrap/Bulma/Foundation
     - predefined classes/styles, can be customized
     - many more available, though not sure what else integrated well with django,
         see: https://zairalabs.ai/guide/guides/css-ui-compared/
+    - not just CSS/styling, but also interactive components like dropdown menus
 
 Tailwind CSS
     - middle ground between CSS (write it yourself) and Bootstrap/others (give me predefined, styled components)
@@ -83,14 +88,37 @@ container queries - responsive container size (for example a button is rendered 
     but doesnt make them mutually exclusive with tailwind
 
 BOTTOMLINE:
--> use Tailwind for now
+- use Tailwind for now
 
 
-# ----- 5-8 Pie in the Sky -----
+# ----- 5-8 Interactive behaviour -----
 
-HTMX
-Vanilla JavaScript
-Alpine.js
-Stimulus
+most important distinction:
+what happens on the server and what happens solely on the browser (client-side)?
+
+with templates:
+- server runs python code and is connected to database
+- browser GETs something from the server
+- browser renders templates and runs javascript for interactive things like dropdown menus
+- browser POSTs something back to the server
+
+
+currently a lot of stuff in the old ogp templates is based on bootstrap
+    (which does styling and javascript interactions within the browser)
+
+more sophisticated things for the new architecture:
+HTMX -> used for server-browser-communication, shortcuts some GET and POST requests
+
+Alpine.js -> simple javascript interactivity, directly added into html templates
+Stimulus.js -> keeps javascript and html separated, slightly less intuitive but
+                potentially cleaner if complexity of interactions grows
+    https://unitysangam.com/tech/alpine-js-vs-stimulus-js/
+    https://dev.to/alex_aslam/alpinejs-vs-stimulus-a-pragmatic-comparison-ake
+
+Vanilla javascript can always be added to program some very specific interactions
+
 React / Vue / Svelte
+    ...and many many more for more complex javascript stuff
 
+BOTTOMLINE:
+- use alpine.js and maybe add some custom javascript or others on top if needed
