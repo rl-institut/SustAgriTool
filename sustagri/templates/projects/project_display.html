@@ -13,33 +13,80 @@
 {% block content %}
 
     <main>
-        <section class="header">
-            <div>
-                <div class="header__left"></div>
-                <h1 class="header__title">{% translate "My Projects" %}</h1>
-                <div class="header__back"></div>
-            </div>
+        <section class="flex justify-center py-8">
+            <h1 class="text-2xl font-semibold">
+                {% translate "My Projects" %}
+            </h1>
         </section>
 
+        <!-- this probably needs a container for justify-center
+        TODO: put whole dropdown-menu into separate partial and include
+        -->
         <section class="projects-new">
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="newProjectButton" data-bs-toggle="dropdown" aria-expanded="false">
+            <div
+                x-data="{ open: false }"
+                @click.outside="open = false"
+                @keydown.escape.window="open = false"
+                class="relative inline-block"
+            >
+                <button
+                    type="button"
+                    @click="open = !open"
+                    :aria-expanded="open.toString()"
+                    aria-haspopup="true"
+                    class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
                     {% translate "Create project" %}
+
+                    <svg
+                        class="h-4 w-4 transition-transform"
+                        :class="{ 'rotate-180': open }"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="newProjectButton">
-                    <li><a class="dropdown-item" href="{% url 'projects:project_create' %}">{% translate "Empty project" %}</a></li>
-                </ul>
+
+                <div
+                    x-show="open"
+                    x-transition
+                    x-cloak
+                    class="absolute left-0 z-50 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5"
+                    role="menu"
+                >
+                    <a
+                        href="{% url 'projects:project_create' %}"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        role="menuitem"
+                        @click="open = false"
+                    >
+                        {% translate "Empty project" %}
+                    </a>
+                </div>
             </div>
         </section>
 
 
         {% for project in project_list %}
 
-            <section class="{{ project }}" id="project-{{ project.id }}">
-                <div>
-                    <div class="project__top">
-                        <a  href="{% url 'steps:project_information' project.id %}">
-                            <h2 class="name">
+            <section
+                id="project-{{ project.id }}"
+                class="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm"
+            >
+                <div class="p-6">
+                    <div class="mb-5">
+                        <a
+                            href="{% url 'steps:project_information' project.id %}"
+                            class="group"
+                        >
+                            <h2 class="text-xl font-semibold text-gray-900 group-hover:text-blue-600">
                                 {% if project.name %}
                                     {{ project.name }}
                                 {% else %}
@@ -48,30 +95,57 @@
                             </h2>
                         </a>
                     </div>
-                    <div class="project__details">
-                        <div class="details">
-                            <div class="detail">
-                                <span class="detail__property">{% translate "Created" %}</span>
-                                <span class="detail__value">{{ project.date_created }}</span>
+
+                    <div class="flex items-end justify-between gap-6">
+                        <div>
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-medium text-gray-500">
+                                    {% translate "Created" %}
+                                </span>
+
+                                <span class="text-sm text-gray-900">
+                                    {{ project.date_created }}
+                                </span>
                             </div>
                         </div>
-                        <div class="actions">
-													  <!-- project actions will go here -->
-                            <form action="{% url 'projects:project_duplicate' project.id %}"
-                                  method="POST">
+
+                        <div class="flex items-center gap-2">
+                            <form
+                                action="{% url 'projects:project_duplicate' project.id %}"
+                                method="POST"
+                            >
                                 {% csrf_token %}
-                                <!-- TODO change the ugly inline style-->
-                                <button style="margin-top:0.25rem;" class="btn btn--action action" type="submit" value="Duplicate">
-                                    <span class="icon icon-duplicate" aria-hidden="true"></span>
+
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                >
+                                    <span
+                                        class="icon icon-duplicate"
+                                        aria-hidden="true"
+                                    ></span>
+
                                     {% translate "Duplicate" %}
                                 </button>
                             </form>
-                            <form action="{% url 'projects:project_delete' project.id %}"
-                                  method="POST">
+
+                            <form
+                                action="{% url 'projects:project_delete' project.id %}"
+                                method="POST"
+                                x-data
+                                @submit.prevent="if (confirm('Are you sure you want to delete?\nThis will also delete all related project data.')) $el.submit()"
+                            >
                                 {% csrf_token %}
-                                <!-- TODO change the ugly inline style-->
-                                <button style="margin-top:0.25rem;" class="btn btn--action action" type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete?' + '\n' +'This will also delete all related project data.')">
-                                    <span class="icon icon-delete" aria-hidden="true"></span>
+
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                >
+                                    <span
+                                        class="icon icon-delete"
+                                        aria-hidden="true"
+                                    ></span>
+
                                     {% translate "Delete" %}
                                 </button>
                             </form>
@@ -80,55 +154,29 @@
                 </div>
             </section>
 
-
         {% empty %}
-            <section class="projects-empty">
-                <div>
-                    <div class="projects-empty__img">
-                        <img src="{% static 'images/empty_folder.svg' %}" alt="Empty folder">
+
+            <section class="py-12">
+                <div class="flex flex-col items-center justify-center text-center">
+                    <div class="mb-4">
+                        <img
+                            src="{% static 'images/empty_folder.svg' %}"
+                            alt="{% translate 'Empty folder' %}"
+                            class="h-24 w-24"
+                        >
                     </div>
-                    <div class="projects-empty__text">
+
+                    <div class="text-gray-600">
                         {% translate "There are no projects yet" %}
                     </div>
                 </div>
             </section>
 
         {% endfor %}
-
-
-
     </main>
 
 {% endblock content %}
 
 
 {% block end_body_scripts %}
-
-<script>
-    (function () {
-        var dropdownMenu;
-        // show it and move it to the body
-        $(window).on('show.bs.dropdown', function (e) {
-            // grab the menu
-            dropdownMenu = $(e.target).find('.dropdown-menu');
-            // detach it and append it to the body
-            $('body').append(dropdownMenu.detach());
-            // grab the new offset position
-            var eOffset = $(e.target).offset();
-            // make sure to place it where it would normally go (this could be improved)
-            dropdownMenu.css({
-                'display': 'block',
-                'top': eOffset.top + $(e.target).outerHeight(),
-                'left': eOffset.left
-            });
-        });
-
-        // and when you hide it, reattach the drop down, and hide it normally
-        $(window).on('hide.bs.dropdown', function (e) {
-            $(e.target).append(dropdownMenu.detach());
-            dropdownMenu.hide();
-        });
-    })();
-</script>
-
 {% endblock end_body_scripts %}
