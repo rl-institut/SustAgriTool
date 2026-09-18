@@ -4,56 +4,60 @@
 
 <!DOCTYPE html>
 <html lang="de">
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+          content="width=device-width, initial-scale=1" />
+    <!-- icon for website as iOS home screen pseudo app, verify rel and href -->
     <link rel="apple-touch-icon"
           sizes="180x180"
           href="{% static 'assets/favicon/apple-touch-icon.png' %}" />
+    <!-- favicon: icon for example used for browser tab, verify href -->
     <link rel="icon"
           type="image/png"
           sizes="32x32"
           href="{% static 'assets/favicon/favicon.ico' %}" />
+    <!-- same as before but different size, maybe both redundant (more modern way to implement exists) -->
     <link rel="icon"
           type="image/png"
           sizes="16x16"
           href="{% static 'assets/favicon/favicon.ico' %}" />
+    <!-- manifest: again used to put webapp on homescreen as pseudo app, verify manifest file -->
     <link rel="manifest" href="{% static 'assets/favicon/site.webmanifest' %}" />
-    <meta name="msapplication-TileColor" content="#2b5797" />
+    <!-- overarching style, adapt content later -->
     <meta name="theme-color" content="#ffffff" />
+
+
     <title>
       {% block title %}
         SustAgri
       {% endblock title %}
     </title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-          crossorigin="anonymous" />
-    {% if DEBUG == True %}
-      {#% include "scss.html" %#}
-    {% else %}
-      <link href="{% static 'css/main.css' %}" rel="stylesheet" type="text/css" />
-    {% endif %}
+
+    <link rel="stylesheet" href="{% static 'css/output.css' %}" />
+
     {% block head_block %}
     {% endblock head_block %}
-    <!--<meta http-equiv="X-UA-Compatible" content="IE=edge" />-->
   </head>
+
   <body>
     {{ redirect_to_login_immediately }}
+    <!-- jQuery: potentially remove it later -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
     {% block start_body_scripts %}{% endblock %}
+
+    <!-- verify if documentation and link to it are correct -->
     {% url 'model_description' as documentation_url %}
 
     {% block navbar %}
       {% include "navbar.html" with user=user documentation_url=documentation_url %}
     {% endblock navbar %}
 
-    {% block topology %}{% endblock %}
-    {% block index %}
-    {% endblock index %}
-    <!-- modal to show debug messages -->
+    {% block topology %}{% endblock topology %}
+    {% block index %}{% endblock index %}
+    <!-- modal to show debug messages, bootstrap, adapt to alpine or HTMX -->
     <div class="modal fade"
          id="messagesModal"
          tabindex="-1"
@@ -62,7 +66,7 @@
          aria-hidden="true">
       <div class="modal-dialog" role="document">{% include 'messages.html' %}</div>
     </div>
-    {% block content %}{% endblock %}
+    {% block content %}{% endblock content %}
 
     {% comment %}
     {% block footer %}
@@ -93,8 +97,12 @@
     {% endblock footer %}
     {% endcomment %}
 
+    <!-- bootstrap will be removed -->
     <script src="{% static 'js/third_party/bootstrap.bundle.min.js' %}"></script>
+
     {% block end_body_scripts %}{% endblock %}
+
+    <!-- javascript, check what it does -->
     <script src="{% static 'js/project.js' %}"></script>
     {% if messages %}
       <script>
@@ -106,3 +114,9 @@
     {% endif %}
   </body>
 </html>
+
+<!--
+how to move on:
+inspect child templates first, install alpine/HTMX second, migrate component-by-component, remove Bootstrap
+then inspect the issues with the <footer>
+-->
