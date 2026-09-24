@@ -1,5 +1,4 @@
-from django.forms import ModelForm
-from django.forms import Textarea
+from django.forms import ModelForm, Textarea, NumberInput
 
 from .models import *
 
@@ -13,4 +12,9 @@ class ProjectForm(ModelForm):
             "user",
             "options",
         ]
-        widgets = {"description": Textarea(attrs={"rows": 7})}
+        widgets = {
+            "description": Textarea(attrs={"rows": 7}),
+            "latitude": NumberInput(attrs={"x-model.number": "latitude"}),
+            "longitude": NumberInput(attrs={"x-model.number": "longitude"}),
+            "altitude": NumberInput(attrs={"x-model.number": "altitude"}),
+            }

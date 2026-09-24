@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 from sustagri.projects.forms import *
 
@@ -44,6 +45,7 @@ def project_information(request, proj_id):
             "page_information": "Project Information",
             "step_list": list(STEPS.values()),
             "form": form,
+            "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
         },
     )
 
