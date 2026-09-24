@@ -1,3 +1,9 @@
+### ------ USEFUL COMMANDS ------ ###
+
+npx @tailwindcss/cli -i ./sustagri/static/css/input.css -o ./sustagri/static/css/output.css --watch
+
+
+
 ### ------ DJANGO design philosophies ------ ###
 
 https://docs.djangoproject.com/en/6.1/misc/design-philosophies/
