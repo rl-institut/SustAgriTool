@@ -1,3 +1,14 @@
+### ------ USEFUL COMMANDS ------ ###
+
+npx @tailwindcss/cli -i ./sustagri/static/css/input.css -o ./sustagri/static/css/output.css --watch
+
+
+
+### ------ DJANGO design philosophies ------ ###
+
+https://docs.djangoproject.com/en/6.1/misc/design-philosophies/
+
+
 ### ------ require_http_methods ------ ###
 
 def project_delete(request, proj_id):
@@ -29,3 +40,6 @@ return redirect("steps:project_information", proj_id=project.id)
 seems to be a simplification of
 
 return HttpResponseRedirect(reverse("steps:project_information", args=[project.id]))
+
+
+### -------- next -------- ###

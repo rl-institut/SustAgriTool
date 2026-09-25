@@ -3,6 +3,7 @@
 {% load i18n %}
 
 {% comment %}
+<!-- navbar here or in base? -->
 {% block navbar %}
   {% include "navbar.html" with user=user scenario_create=True documentation_url=documentation_url %}
 {% endblock navbar %}
@@ -11,67 +12,75 @@
 {% block title %}
   {% translate "Scenario step" %} {{ step_id }}
 {% endblock title %}
-<!-- WRITE HTML CODE WITHIN THESE block content TAGS -->
+
 {% block content %}
   <section class="wizard">
     <div>
-      <h1 class="wizard__name">
-        <span class="project">{{ proj_name }}</span>
-        <!--span class="scenario">{% translate "Scenario" %} {{ scenario.name }}</span -->
+      <h1 class="flex flex-row justify-center pb-2 text-lg">
+        <span class="font-bold">
+          {% if project.name %}
+              {{ project.name }}
+          {% else %}
+              {% translate "Unnamed" %}
+          {% endif %}
+        </span>
       </h1>
-      <div class="wizard__steps">
-        <ul>
-          {% for step in step_list %}
-            <li {% if step_id == forloop.counter %}class="active"{% endif %}>
-              {% if proj_id %}
-                <a href="{% url 'steps:ogp_steps' proj_id forloop.counter %}">{% translate step %}</a>
-              {% else %}
-                {% translate step %}
-              {% endif %}
-            </li>
-          {% endfor %}
+      <nav class="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+        <ul class="m-0 flex w-full list-none items-center p-0">
+            {% for step in step_list %}
+                <li class="relative flex min-w-0 flex-1 items-center text-sm font-bold
+                    {% if step_id == forloop.counter %}
+                        text-[#1F567D]
+                    {% else %}
+                        text-[#A8B5C0]
+                    {% endif %}">
+
+                    <span class="mr-2 inline-flex size-8 items-center justify-center rounded-full text-white
+                        {% if step_id == forloop.counter %}
+                            bg-[#1F567D]
+                        {% else %}
+                            bg-[#A8B5C0]
+                        {% endif %}">
+                        {{ forloop.counter }}
+                    </span>
+
+                    {% if proj_id %}
+                        <a href="{% url 'steps:ogp_steps' proj_id forloop.counter %}">
+                            {% translate step %}
+                        </a>
+                    {% else %}
+                        {% translate step %}
+                    {% endif %}
+
+                </li>
+            {% endfor %}
         </ul>
-      </div>
+      </nav>
     </div>
   </section>
-  <div class="scenario-create__info-message">
-    {% block step_explanation %}
-      {% if page_information %}
-        <div>
-          <p>{{ page_information }}</p>
-        </div>
-      {% endif %}
-    {% endblock step_explanation %}
-  </div>
-  {% block progression_content %}
-  {% endblock progression_content %}
+
+  <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    {% block progression_content %}
+    {% endblock progression_content %}
+  </main>
+
   {% block step_footer %}
-    <div class="step-footer">
-      <div>
-        <div class="step-footer__left"></div>
-        <div class="step-footer__center">
-          {% if proj_id %}
+    <div class="flex justify-center gap-4 py-6">
+        {% if proj_id %}
             {% if step_id > 1 %}
-              <a id="previous-button"
-                 class="btn btn--medium btn--hollow btn--previous"
-                 href="{% url 'steps:ogp_steps' proj_id step_id|add:'-1' %}"
-                 aria-disabled="true">{% translate "Previous" %}</a>
+                {% url 'steps:ogp_steps' proj_id step_id|add:'-1' as previous_url %}
+                {% include "partials/buttons.html#btn-link" with id="previous-button" label="Previous" href=previous_url %}
             {% endif %}
+
             {% if step_id < step_list|length %}
-              {% block next_btn %}
-                <a id="next-button"
-                   class="btn btn--medium"
-                   href="{% url 'steps:ogp_steps' proj_id step_id|add:1 %}">{% translate "Next" %}</a>
-              {% endblock next_btn %}
+                {% block next_btn %}
+                    {% url 'steps:ogp_steps' proj_id step_id|add:'1' as next_url %}
+                    {% include "partials/buttons.html#btn-link" with id="next-button" label="Next" href=next_url %}
+                {% endblock next_btn %}
             {% endif %}
-          {% else %}
-            <button id="next-button"
-                    class="btn btn--medium"
-                    onclick="javascript:document.getElementById('submitFormBtn').click();">{% translate "Next" %}</button>
-          {% endif %}
-        </div>
-        <div class="step-footer__right"></div>
-      </div>
+        {% else %}
+            {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" %}
+        {% endif %}
     </div>
-  {% endblock step_footer %}
+{% endblock step_footer %}
 {% endblock content %}

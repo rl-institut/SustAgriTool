@@ -1,24 +1,172 @@
 {% extends "step_progression.html" %}
 
-{% load crispy_forms_tags %}
+{% load tailwind_filters %}
 {% load i18n %}
 
+{% block head_block %}
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock head_block %}
+
+{% block start_body_scripts %}
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+{% endblock start_body_scripts %}
+
 {% block progression_content %}
+    <div x-data="locationPicker()">
+      <section class="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch">
+        <div>
+          <form method="post" id="project-information-form">
+              {% csrf_token %}
+              {{ form | crispy }}
+          </form>
+        </div>
 
-<h2>Project Information</h2>
 
-<form method="post" id="project-information-form">
-    {% csrf_token %}
-    {{ form | crispy }}
-</form>
+        <div class="min-h-[500px]">
+          <div id="mapid" class="h-full w-full rounded-lg"></div>
+          <script>
+              function locationPicker() {
+                  return {
+                      latitude: null,
+                      longitude: null,
+                      altitude: null,
+
+                      map: null,
+                      marker: null,
+                      syncTimeout: null,
+
+                      init() {
+                          // Read existing Django form values before initializing the map.
+                          const latInput = document.getElementById("id_latitude");
+                          const lonInput = document.getElementById("id_longitude");
+                          const altInput = document.getElementById("id_altitude");
+
+                          if (latInput.value !== "") {
+                              this.latitude = Number(latInput.value);
+                          }
+
+                          if (lonInput.value !== "") {
+                              this.longitude = Number(lonInput.value);
+                          }
+
+                          if (altInput && altInput.value !== "") {
+                              this.altitude = Number(altInput.value);
+                          }
+
+                          // Default map view: Centre of the mediterranian
+                          let center = [35, 18];
+                          let zoom = 4;
+
+                          // Use stored coordinates when available
+                          if (this.hasValidCoordinates()) {
+                              center = [this.latitude, this.longitude];
+                              zoom = 10;
+                          }
+
+                          this.map = L.map("mapid").setView(center, zoom);
+
+                          L.tileLayer(
+                              "https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/512/{z}/{x}/{y}?access_token={{ MAPBOX_ACCESS_TOKEN }}",
+                              {
+                                  tileSize: 512,
+                                  zoomOffset: -1,
+                                  maxZoom: 19,
+                                  attribution: '&copy; OpenStreetMap contributors &copy; Mapbox'
+                              }
+                          ).addTo(this.map);
+
+                          // Existing project: show its marker immediately.
+                          if (this.hasValidCoordinates()) {
+                              this.setMarker();
+                          }
+
+                          // Map → form
+                          this.map.on("click", (event) => {
+                              this.latitude = Number(event.latlng.lat.toFixed(6));
+                              this.longitude = Number(event.latlng.lng.toFixed(6));
+
+                              this.setMarker();
+                              this.updateAltitude();
+                          });
+
+                          // Form → map
+                          this.$watch("latitude", () => this.scheduleCoordinateUpdate());
+                          this.$watch("longitude", () => this.scheduleCoordinateUpdate());
+                      },
+
+                      hasValidCoordinates() {
+                          return (
+                              Number.isFinite(this.latitude) &&
+                              Number.isFinite(this.longitude) &&
+                              this.latitude >= -90 &&
+                              this.latitude <= 90 &&
+                              this.longitude >= -180 &&
+                              this.longitude <= 180
+                          );
+                      },
+
+                      setMarker() {
+                          if (!this.hasValidCoordinates()) {
+                              return;
+                          }
+
+                          const position = [this.latitude, this.longitude];
+
+                          if (this.marker) {
+                              this.marker.setLatLng(position);
+                          } else {
+                              this.marker = L.marker(position).addTo(this.map);
+                          }
+                      },
+
+                      scheduleCoordinateUpdate() {
+                          clearTimeout(this.syncTimeout);
+
+                          this.syncTimeout = setTimeout(() => {
+                              if (!this.hasValidCoordinates()) {
+                                  return;
+                              }
+
+                              this.setMarker();
+                              this.map.panTo([this.latitude, this.longitude]);
+                              this.updateAltitude();
+                          }, 400);
+                      },
+
+                      async updateAltitude() {
+                          if (!this.hasValidCoordinates()) {
+                              return;
+                          }
+
+                          try {
+                              const response = await fetch(
+                                  `https://api.open-meteo.com/v1/elevation?latitude=${this.latitude}&longitude=${this.longitude}`
+                              );
+
+                              if (!response.ok) {
+                                  throw new Error("Elevation request failed");
+                              }
+
+                              const data = await response.json();
+
+                              this.altitude = data.elevation[0];
+                          } catch (error) {
+                              console.error("Could not retrieve elevation:", error);
+                          }
+                      }
+                  };
+              }
+          </script>
+        </div>
+      </section>
+    </div>
+
+
 
 {% endblock progression_content %}
 
 {% block next_btn %}
-    <button id="next-button"
-            class="btn btn--medium"
-            type="submit"
-            form="project-information-form">
-        {% translate "Next" %}
-    </button>
+    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" %}
 {% endblock next_btn %}
