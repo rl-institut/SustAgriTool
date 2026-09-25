@@ -16,20 +16,31 @@
 {% block content %}
   <section class="wizard">
     <div>
-      <h1 class="flex flex-row justify-center pb-2 text-sm">
-    <span class="font-bold">{{ proj_name }}</span>
+      <h1 class="flex flex-row justify-center pb-2 text-lg">
+        <span class="font-bold">
+          {% if project.name %}
+              {{ project.name }}
+          {% else %}
+              {% translate "Unnamed" %}
+          {% endif %}
+        </span>
       </h1>
-      <nav class="flex flex-col items-center justify-center">
-        <ul class="m-0 flex list-none p-0">
+      <nav class="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+        <ul class="m-0 flex w-full list-none items-center p-0">
             {% for step in step_list %}
-                <li class="relative text-sm font-bold
+                <li class="relative flex min-w-0 flex-1 items-center text-sm font-bold
                     {% if step_id == forloop.counter %}
                         text-[#1F567D]
                     {% else %}
                         text-[#A8B5C0]
                     {% endif %}">
 
-                    <span class="mr-2 inline-flex size-8 items-center justify-center rounded-full bg-[#A8B5C0] text-white">
+                    <span class="mr-2 inline-flex size-8 items-center justify-center rounded-full text-white
+                        {% if step_id == forloop.counter %}
+                            bg-[#1F567D]
+                        {% else %}
+                            bg-[#A8B5C0]
+                        {% endif %}">
                         {{ forloop.counter }}
                     </span>
 
@@ -47,13 +58,6 @@
       </nav>
     </div>
   </section>
-  <div class="text-center">
-    {% block step_explanation %}
-        {% if page_information %}
-            <p>{{ page_information }}</p>
-        {% endif %}
-    {% endblock step_explanation %}
-  </div>
 
   <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
     {% block progression_content %}
