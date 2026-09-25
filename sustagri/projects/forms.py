@@ -18,3 +18,13 @@ class ProjectForm(ModelForm):
             "longitude": NumberInput(attrs={"x-model.number": "longitude"}),
             "altitude": NumberInput(attrs={"x-model.number": "altitude"}),
             }
+        help_texts = {
+            "latitude": "Latitude coordinate of the project's location, in decimal degrees.",
+            "longitude": "Longitude coordinate of the project's location, in decimal degrees.",
+            "altitude": "Altitude of the project's location, in metres above sea level.",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in ("latitude", "longitude", "altitude"):
+            self.fields[field].required = True
