@@ -367,3 +367,6 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+# TODO: create new token for sustagri and use github secrets?
+# TODO: confirm if we use this mapbox map or smth else
+MAPBOX_ACCESS_TOKEN = env("MAPBOX_ACCESS_TOKEN")
