@@ -168,10 +168,5 @@
 {% endblock progression_content %}
 
 {% block next_btn %}
-    <button id="next-button"
-            class="btn btn--medium"
-            type="submit"
-            form="project-information-form">
-        {% translate "Next" %}
-    </button>
+    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" %}
 {% endblock next_btn %}

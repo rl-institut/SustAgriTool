@@ -68,34 +68,18 @@
     <div class="flex justify-center gap-4 py-6">
         {% if proj_id %}
             {% if step_id > 1 %}
-                <a
-                    id="previous-button"
-                    class="rounded-md bg-green-600 px-6 py-2.5 text-base font-medium text-white hover:bg-green-700"
-                    href="{% url 'steps:ogp_steps' proj_id step_id|add:'-1' %}"
-                >
-                    {% translate "Previous" %}
-                </a>
+                {% url 'steps:ogp_steps' proj_id step_id|add:'-1' as previous_url %}
+                {% include "partials/buttons.html#btn-link" with id="previous-button" label="Previous" href=previous_url %}
             {% endif %}
 
             {% if step_id < step_list|length %}
                 {% block next_btn %}
-                    <a
-                        id="next-button"
-                        class="rounded-md bg-green-600 px-6 py-2.5 text-base font-medium text-white hover:bg-green-700"
-                        href="{% url 'steps:ogp_steps' proj_id step_id|add:1 %}"
-                    >
-                        {% translate "Next" %}
-                    </a>
+                    {% url 'steps:ogp_steps' proj_id step_id|add:'1' as next_url %}
+                    {% include "partials/buttons.html#btn-link" with id="next-button" label="Next" href=next_url %}
                 {% endblock next_btn %}
             {% endif %}
         {% else %}
-            <button
-                id="next-button"
-                class="rounded-md bg-green-600 px-6 py-2.5 text-base font-medium text-white hover:bg-green-700"
-                onclick="document.getElementById('submitFormBtn').click();"
-            >
-                {% translate "Next" %}
-            </button>
+            {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" %}
         {% endif %}
     </div>
 {% endblock step_footer %}
