@@ -28,4 +28,24 @@ urlpatterns = [
         survey,
         name="survey",
     ),
+    path(
+        "agroforestry_practices/<int:proj_id>",
+        agroforestry_practices,
+        name="agroforestry_practices",
+        ),
+    path(
+        "relevant_policies/<int:proj_id>",
+        relevant_policies,
+        name="relevant_policies",
+    ),
+    path(
+        "business_models/<int:proj_id>",
+        business_models,
+        name="business_models",
+    ),
+    path(
+        "example_case_studies/<int:proj_id>",
+        example_case_studies,
+        name="example_case_studies",
+    ),
 ]
