@@ -14,16 +14,14 @@
 {% endblock title %}
 
 {% block content %}
-  <section class="wizard">
+  <section>
     <div>
-      <h1 class="flex flex-row justify-center pb-2 text-lg">
-        <span class="font-bold">
-          {% if project.name %}
-              {{ project.name }}
+      <h1 class="flex justify-center pb-2 text-lg font-bold">
+          {% if proj_name %}
+              {{ proj_name }}
           {% else %}
               {% translate "Unnamed" %}
           {% endif %}
-        </span>
       </h1>
       <nav class="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <ul class="m-0 flex w-full list-none items-center p-0">
