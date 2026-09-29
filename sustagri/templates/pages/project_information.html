@@ -14,6 +14,15 @@
 {% endblock start_body_scripts %}
 
 {% block progression_content %}
+    <!-- This section may become a partial to be included on all pages -->
+    <section class="mb-8 text-sm hyphens-auto break-words">
+      {% blocktranslate %}
+        Perhaps you would like some information about this page and how to fill the form?
+        I am just writing a little bit more meaningless nonsense to check how long paragraphs
+        annnnnndddd hyphenation look like...
+      {% endblocktranslate %}
+    </section>
+
     <div x-data="locationPicker()">
       <section class="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch">
         <div>
