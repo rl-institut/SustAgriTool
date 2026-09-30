@@ -64,26 +64,17 @@
 
   {% block step_footer %}
     <div class="flex justify-center gap-4 py-6">
-        {% if proj_id %}
-            {% if step_id > 1 %}
-                {% url 'steps:ogp_steps' proj_id step_id|add:'-1' as previous_url %}
-                {% include "partials/buttons.html#btn-link" with id="previous-button" label="Previous" href=previous_url %}
-            {% endif %}
+      {% if step_id > 1 %}
+          {% url 'steps:ogp_steps' proj_id step_id|add:'-1' as previous_url %}
+          {% include "partials/buttons.html#btn-link" with id="previous-button" label="Previous" href=previous_url %}
+      {% endif %}
 
-            {% if step_id < step_list|length %}
-                {% block next_btn %}
-                    {% url 'steps:ogp_steps' proj_id step_id|add:'1' as next_url %}
-                    {% include "partials/buttons.html#btn-link" with id="next-button" label="Next" href=next_url %}
-                {% endblock next_btn %}
-            {% endif %}
-        <!--
-        This else condition is redundant, because the project itself is created before reaching this page.
-         Discuss project generation workflow in general.
-         Is there anything relevant on the downside of the current implementation?
-         -->
-        {% else %}
-            {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" %}
-        {% endif %}
+      {% if step_id < step_list|length %}
+          {% block next_btn %}
+              {% url 'steps:ogp_steps' proj_id step_id|add:'1' as next_url %}
+              {% include "partials/buttons.html#btn-link" with id="next-button" label="Next" href=next_url %}
+          {% endblock next_btn %}
+      {% endif %}
     </div>
 {% endblock step_footer %}
 {% endblock content %}
