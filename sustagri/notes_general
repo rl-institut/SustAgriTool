@@ -42,4 +42,8 @@ seems to be a simplification of
 return HttpResponseRedirect(reverse("steps:project_information", args=[project.id]))
 
 
-### -------- next -------- ###
+### -------- aria-hidden -------- ###
+
+ARIA = Accessible Rich Internet Application
+-> assistance for people with disabilities
+-> aria-hidden: Prevents screen-reader from reading things that are not meant to be read!
