@@ -47,3 +47,9 @@ return HttpResponseRedirect(reverse("steps:project_information", args=[project.i
 ARIA = Accessible Rich Internet Application
 -> assistance for people with disabilities
 -> aria-hidden: Prevents screen-reader from reading things that are not meant to be read!
+
+
+### -------- custom template tags -------- ###
+
+Where should they be stored?
+Which do we truly need and which are leftovers?

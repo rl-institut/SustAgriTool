@@ -49,11 +49,8 @@
 
     {% block start_body_scripts %}{% endblock %}
 
-    <!-- verify if documentation and link to it are correct -->
-    {% url 'model_description' as documentation_url %}
-
     {% block navbar %}
-      {% include "navbar.html" with user=user documentation_url=documentation_url %}
+      {% include "navbar.html" with user=user %}
     {% endblock navbar %}
 
     {% block topology %}{% endblock topology %}
