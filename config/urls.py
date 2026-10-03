@@ -21,7 +21,13 @@ urlpatterns = [
     # User management
     path("users/", include("sustagri.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
-    # Your stuff: custom urls includes go here
+    # Content without views
+    # TODO: "about" and "documentation" two separate things?
+    path("documentation/", TemplateView.as_view(template_name="info/documentation.html"), name="documentation"),
+    path("contact/", TemplateView.as_view(template_name="info/contact.html"), name="contact"),
+    path("license/", TemplateView.as_view(template_name="info/license.html"), name="license"),
+    # Content with views
+    # TODO: refactor templates from /pages/ to /steps/ ?
     path("steps/", include("sustagri.steps.urls", namespace="steps")),
     path("", include("sustagri.projects.urls", namespace="projects")),
     # ...
