@@ -2,16 +2,13 @@
 
 {% load i18n %}
 
-{% comment %}
-<!-- navbar here or in base? -->
-{% block navbar %}
-  {% include "navbar.html" with user=user scenario_create=True documentation_url=documentation_url %}
-{% endblock navbar %}
-{% endcomment %}
-
 {% block title %}
   {% translate "Scenario step" %} {{ step_id }}
 {% endblock title %}
+
+{% block navbar %}
+  {% include "navbar.html" with user=user in_project=True %}
+{% endblock navbar %}
 
 {% block content %}
   <section class="px-4 sm:px-6 lg:px-8">

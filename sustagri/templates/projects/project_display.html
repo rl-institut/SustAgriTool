@@ -10,8 +10,11 @@
 
 {% block title %}{% translate "Projects" %}{% endblock title %}
 
-{% block content %}
+{% block navbar %}
+  {% include "navbar.html" with user=user in_project_list=True %}
+{% endblock navbar %}
 
+{% block content %}
     <main>
         <section class="flex justify-center py-8">
             <h1 class="text-2xl font-semibold">
