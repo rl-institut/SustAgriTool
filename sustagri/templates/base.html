@@ -66,34 +66,31 @@
     </div>
     {% block content %}{% endblock content %}
 
-    {% comment %}
     {% block footer %}
-      <footer class="footer">
+      <footer class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+
+        <a href="{% url 'projects:home' %}">
+          <img src="{% static 'assets/logos/SustAgriTool.svg' %}"
+               alt="SustAgriTool Logo" />
+        </a>
         <div>
-          <div class="footer__logo">
-            <img src="{% static 'assets/logos/PeopleSunLogo.png' %}"
-                 alt="PeopleSun logo" />
-          </div>
-          <div class="footer__links">
-            <ul>
-              <li>
-                <a href="{% url 'about' %}">{% translate "Contact" %}</a>
-              </li>
-              <li>
-                <a href="{% url 'imprint' %}">{% translate "Imprint" %}</a>
-              </li>
-              <li>
-                <a href="{% url 'privacy' %}">{% translate "Privacy" %}</a>
-              </li>
-              <li>
-                <a href="https://github.com/rl-institut/django-offgridplanner">{% blocktranslate %} Version {{ APP_VERSION_NUMBER }} {% endblocktranslate %}</a>
-              </li>
-            </ul>
-          </div>
+          <ul>
+            {% url 'contact' as link %}
+            {% include "partials/buttons.html#btn-link" with id="contact-button" label="Contact" href=link %}
+
+            {% url 'license' as link %}
+            {% include "partials/buttons.html#btn-link" with id="license-button" label="License" href=link %}
+
+            {% url 'imprint' as link %}
+            {% include "partials/buttons.html#btn-link" with id="imprint-button" label="Imprint" href=link %}
+
+            {% url 'privacy' as link %}
+            {% include "partials/buttons.html#btn-link" with id="privacy-button" label="Privacy" href=link %}
+          </ul>
         </div>
+
       </footer>
     {% endblock footer %}
-    {% endcomment %}
 
     <!-- bootstrap will be removed -->
     <script src="{% static 'js/third_party/bootstrap.bundle.min.js' %}"></script>
@@ -112,9 +109,3 @@
     {% endif %}
   </body>
 </html>
-
-<!--
-how to move on:
-inspect child templates first, install alpine/HTMX second, migrate component-by-component, remove Bootstrap
-then inspect the issues with the <footer>
--->
