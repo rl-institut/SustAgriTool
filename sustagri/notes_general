@@ -1,7 +1,9 @@
-### ------ USEFUL COMMANDS ------ ###
+### ------ Tailwind ------ ###
 
 npx @tailwindcss/cli -i ./sustagri/static/css/input.css -o ./sustagri/static/css/output.css --watch
 
+command order ambiguous, good practice:
+layout → spacing → sizing → typography → colors → borders → states
 
 
 ### ------ DJANGO design philosophies ------ ###

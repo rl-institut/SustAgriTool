@@ -64,7 +64,10 @@
          aria-hidden="true">
       <div class="modal-dialog" role="document">{% include 'messages.html' %}</div>
     </div>
+
+    <main class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
     {% block content %}{% endblock content %}
+    </main>
 
     {% block footer %}
       <footer class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
@@ -76,16 +79,16 @@
         <div>
           <ul>
             {% url 'contact' as link %}
-            {% include "partials/buttons.html#btn-link" with id="contact-button" label="Contact" href=link %}
+            {% include "partials/buttons.html#btn-link" with id="contact-button" label="Contact" href=link class="navbar-btn" %}
 
             {% url 'license' as link %}
-            {% include "partials/buttons.html#btn-link" with id="license-button" label="License" href=link %}
+            {% include "partials/buttons.html#btn-link" with id="license-button" label="License" href=link class="navbar-btn" %}
 
             {% url 'imprint' as link %}
-            {% include "partials/buttons.html#btn-link" with id="imprint-button" label="Imprint" href=link %}
+            {% include "partials/buttons.html#btn-link" with id="imprint-button" label="Imprint" href=link class="navbar-btn" %}
 
             {% url 'privacy' as link %}
-            {% include "partials/buttons.html#btn-link" with id="privacy-button" label="Privacy" href=link %}
+            {% include "partials/buttons.html#btn-link" with id="privacy-button" label="Privacy" href=link class="navbar-btn" %}
           </ul>
         </div>
 

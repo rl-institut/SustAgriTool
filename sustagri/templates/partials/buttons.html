@@ -5,7 +5,7 @@
   <a
       id="{{ id }}"
       href="{{ href }}"
-      class="wizard-btn"
+      class="{{ class }}"
   >
       {% translate label %}
   </a>
@@ -17,7 +17,7 @@
       id="{{ id }}"
       type="submit"
       {% if form_id %}form="{{ form_id }}"{% endif %}
-      class="wizard-btn"
+      class="{{ class }}"
   >
       {% translate label %}
   </button>

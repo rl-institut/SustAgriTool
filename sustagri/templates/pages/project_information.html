@@ -15,7 +15,7 @@
 
 {% block progression_content %}
     <!-- This section may become a partial to be included on all pages -->
-    <section class="mb-8 text-sm hyphens-auto break-words">
+    <section class="mb-8 hyphens-auto break-words">
       {% blocktranslate %}
         Perhaps you would like some information about this page and how to fill the form?
         I am just writing a little bit more meaningless nonsense to check how long paragraphs
@@ -171,11 +171,8 @@
         </div>
       </section>
     </div>
-
-
-
 {% endblock progression_content %}
 
 {% block next_btn %}
-    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" %}
+    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" class="wizard-btn" %}
 {% endblock next_btn %}
