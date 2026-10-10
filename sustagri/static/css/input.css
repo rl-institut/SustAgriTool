@@ -2,11 +2,47 @@
 
 @source "../../templates";
 
+
+@theme {
+  --color-brand-200: var(--color-lime-200);
+  --color-brand-300: var(--color-lime-300);
+  --color-brand-500: var(--color-lime-500);
+  --color-brand-700: var(--color-lime-700);
+  --color-brand-800: var(--color-lime-800);
+}
+
+@layer base {
+  body {
+    @apply text-sm text-neutral-700;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-xl font-semibold text-brand-700;
+  }
+
+  a, button, input, select, textarea {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2;
+  }
+}
+
 @layer components {
     .wizard-btn {
-        @apply inline-flex min-w-28 items-center justify-center rounded-md bg-green-600 px-6 py-2.5 text-base font-medium text-white hover:bg-green-700 cursor-pointer;
+        @apply inline-flex min-w-28 items-center justify-center rounded-md bg-brand-700 px-6 py-2.5 text-base font-medium text-white hover:bg-brand-800 cursor-pointer;
+    }
+
+    .navbar-btn {
+        @apply inline-flex items-center justify-center rounded-sm bg-transparent px-3 py-2 text-base font-medium text-brand-700 cursor-pointer;
+    }
+
+    .dropdown-container {
+        @apply absolute left-0 z-50 mt-2 w-48 rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5;
+    }
+
+    .dropdown-item {
+        @apply block w-full rounded-sm px-4 py-2 hover:bg-neutral-100 cursor-pointer;
     }
 }
+
 
 [x-cloak] {
     display: none !important;

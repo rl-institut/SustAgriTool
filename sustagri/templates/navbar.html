@@ -23,35 +23,30 @@
     <div class="ml-auto hidden flex-col items-end gap-4 lg:flex lg:flex-row lg:items-center lg:gap-6"
      :class="{ '!flex': open }">
 
-      <div>
-        <ul>
-          <!-- if-signup-tag needed? -->
-          {% if user.is_authenticated %}
-            {% if not in_project %}
+      <div class="flex items-center gap-4">
+        <!-- if-signup-tag needed? -->
+        {% if user.is_authenticated %}
+          {% if not in_project %}
 
-            {% if not in_project_list %}
-              {% url 'projects:projects_list' as link %}
-              {% include "partials/buttons.html#btn-link" with id="projects-list-button" label="My projects" href=link %}
-            {% endif %}
-
-              {% url 'projects:project_create' as link %}
-              {% include "partials/buttons.html#btn-link" with id="new-project-button" label="New project" href=link %}
-
-            {% endif %}
-          {% else %}
-            <!-- buttons for contact and license? -->
+          {% if not in_project_list %}
+            {% url 'projects:projects_list' as link %}
+            {% include "partials/buttons.html#btn-link" with id="projects-list-button" label="My projects" href=link class="navbar-btn" %}
           {% endif %}
-        </ul>
-      </div>
 
-      <div>
+            {% url 'projects:project_create' as link %}
+            {% include "partials/buttons.html#btn-link" with id="new-project-button" label="New project" href=link class="navbar-btn" %}
+
+          {% endif %}
+        {% else %}
+          <!-- buttons for contact and license? -->
+        {% endif %}
+
         <!-- Multiple documentations? Make the link flexible -->
         {% url 'documentation' as link %}
-        {% include "partials/buttons.html#btn-link" with id="documentation-button" label="Documentation" href=link %}
-        <span class="h-5 w-px bg-gray-300"></span>
+        {% include "partials/buttons.html#btn-link" with id="documentation-button" label="Documentation" href=link class="navbar-btn" %}
       </div>
 
-      <div>
+      <div class="px-3">
         <!-- modified login/signup/user handling -->
         {% if user.is_authenticated %}
           <li class="relative" x-data="{ profileOpen: false }">
@@ -69,21 +64,21 @@
             <ul x-show="profileOpen"
               x-cloak
               @click.outside="profileOpen = false"
-              class="absolute right-0 z-50 mt-2 min-w-40 rounded-md bg-white py-1 shadow-lg">
+              class="dropdown-container">
               <li>
-                <a class="block px-4 py-2 hover:bg-gray-100"
+                <a class="dropdown-item"
                    href="{% url 'users:user_info' %}">
                     {% translate "Account" %}
                 </a>
               </li>
-              <li class="my-1 border-t border-gray-200"></li>
+              <li class="my-1 border-t border-neutral-200"></li>
               <li>
                 <!-- Take care of log-out/user handling in general -->
                 <form>
                     {% csrf_token %}
                     <button type="submit"
                       disabled
-                      class="block w-full px-4 py-2 text-left hover:bg-gray-100">
+                      class="dropdown-item">
                       {% translate "Log out" %}
                     </button>
                 </form>
@@ -95,36 +90,38 @@
           <!-- wait for proper user handling... -->
           <li>
             {% url 'projects:projects_list' as link %}
-            {% include "partials/buttons.html#btn-link" with id="log-in-button" label="My projects" href=link %}
+            {% include "partials/buttons.html#btn-link" with id="log-in-button" label="My Projects" href=link class="navbar-btn" %}
 
             {% url 'projects:project_create' as link %}
-            {% include "partials/buttons.html#btn-link" with id="sign-up-button" label="New project" href=link %}
+            {% include "partials/buttons.html#btn-link" with id="sign-up-button" label="New Project" href=link class="navbar-btn" %}
           </li>
           {% endcomment %}
         {% endif %}
       </div>
     </div>
 
-    <form action="{% url 'set_language' %}" method="post" id="language-switcher">
-      {% csrf_token %}
-      <input name="next" type="hidden" value="{{ request.get_full_path|custom_redir_lang }}" />
-      <select name="language"
-              onchange="this.form.submit()"
-              class="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm"
-              aria-label="{% translate 'Language' %}">
+    <div class="px-3">
+      <form action="{% url 'set_language' %}" method="post" id="language-switcher">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ request.get_full_path|custom_redir_lang }}" />
+        <select name="language"
+                onchange="this.form.submit()"
+                class="dropdown-item"
+                aria-label="{% translate 'Language' %}">
 
-        {% get_current_language as LANGUAGE_CODE %}
-        {% get_available_languages as LANGUAGES %}
-        {% get_language_info_list for LANGUAGES as languages %}
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
 
-        {% for language in languages %}
-          <option value="{{ language.code }}"
-                  {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
-            {{ language.code|upper }}
-          </option>
-        {% endfor %}
-      </select>
-    </form>
+          {% for language in languages %}
+            <option value="{{ language.code }}"
+                    {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+              {{ language.code|upper }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
 
   </div>
 </nav>
