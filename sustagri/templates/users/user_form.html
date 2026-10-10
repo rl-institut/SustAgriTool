@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load crispy_forms_tags %}
+{% load tailwind_filters %}
 
 {% block title %}
 
@@ -11,11 +11,11 @@
 {% endblock title %}
 {% block content %}
   <h1>
-  
-  
+
+
     {{ user.username }}
-  
-  
+
+
 </h1>
 <form class="form-horizontal"
       method="post"
