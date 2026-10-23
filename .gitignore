@@ -329,3 +329,8 @@ sustagri/media/
 .ipython/
 .env
 .envs/*
+
+
+### Custom/Development
+mailpit.exe
+
