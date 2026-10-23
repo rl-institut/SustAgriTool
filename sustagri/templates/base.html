@@ -1,141 +1,114 @@
+{% load static %}
+{% load i18n %}
+{% load custom_template_tags %}
 
-{% load static i18n %}<!DOCTYPE html>
-{% get_current_language as LANGUAGE_CODE %}
-<html lang="{{ LANGUAGE_CODE }}">
+<!DOCTYPE html>
+<html lang="de">
+
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+    <!-- icon for website as iOS home screen pseudo app, verify rel and href -->
+    <link rel="apple-touch-icon"
+          sizes="180x180"
+          href="{% static 'assets/favicon/apple-touch-icon.png' %}" />
+    <!-- favicon: icon for example used for browser tab, verify href -->
+    <link rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="{% static 'assets/favicon/favicon.ico' %}" />
+    <!-- same as before but different size, maybe both redundant (more modern way to implement exists) -->
+    <link rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="{% static 'assets/favicon/favicon.ico' %}" />
+    <!-- manifest: again used to put webapp on homescreen as pseudo app, verify manifest file -->
+    <link rel="manifest" href="{% static 'assets/favicon/site.webmanifest' %}" />
+    <!-- overarching style, adapt content later -->
+    <meta name="theme-color" content="#ffffff" />
+    <script defer src="{% static 'js/third_party/alpine.min.js' %}"></script>
+
+
     <title>
       {% block title %}
-      SustAgri
-    {% endblock title %}
-  </title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description"
-        content="Planning tool for agroforestry systems" />
-  <meta name="author"
-        content="Max-Jonathan Libberoth" />
-  <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" />
-  {% block css %}
-    <!-- Latest compiled and minified Bootstrap CSS -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css"
-          integrity="sha512-SbiR/eusphKoMVVXysTKG/7VseWii+Y3FdHrt0EpKgpToZeemhqHeZeLWLhJutz/2ut2Vw1uQEj2MbRF+TVBUA=="
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer" />
-<!-- Your stuff: Third-party CSS libraries go here -->
-<!-- This file stores project-specific CSS -->
+        SustAgri
+      {% endblock title %}
+    </title>
 
-  
-  <link href="{% static 'css/project.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'css/output.css' %}" />
 
+    {% block head_block %}
+    {% endblock head_block %}
+  </head>
 
-{% endblock css %}
-<!-- Le javascript
-    ================================================== -->
-{# Placed at the top of the document so pages load faster with defer #}
-{% block javascript %}
+  <body>
+    {{ redirect_to_login_immediately }}
+    <!-- jQuery: potentially remove it later -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
+    {% block start_body_scripts %}{% endblock %}
 
-<!-- Bootstrap JS -->
-<script defer
-        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
-        integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"></script>
-<!-- Your stuff: Third-party javascript libraries go here -->
+    {% block navbar %}
+      {% include "navbar.html" with user=user %}
+    {% endblock navbar %}
 
+    {% block topology %}{% endblock topology %}
+    {% block index %}{% endblock index %}
+    <!-- modal to show debug messages, bootstrap, adapt to alpine or HTMX -->
+    <div class="modal fade"
+         id="messagesModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="messagesModalLabel"
+         aria-hidden="true">
+      <div class="modal-dialog" role="document">{% include 'messages.html' %}</div>
+    </div>
 
-<!-- place project specific Javascript in this file -->
+    <main class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
+    {% block content %}{% endblock content %}
+    </main>
 
-  
-  <script defer src="{% static 'js/project.js' %}"></script>
+    {% block footer %}
+      <footer class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
 
+        <a href="{% url 'projects:home' %}">
+          <img src="{% static 'assets/logos/SustAgriTool.svg' %}"
+               alt="SustAgriTool Logo" />
+        </a>
+        <div>
+          <ul>
+            {% url 'contact' as link %}
+            {% include "partials/buttons.html#btn-link" with id="contact-button" label="Contact" href=link class="navbar-btn" %}
 
-{% endblock javascript %}
-</head>
-<body class="{% block bodyclass %}{% endblock bodyclass %}">
-  {% block body %}
-  <div class="mb-1">
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-      <div class="container-fluid">
-        <button class="navbar-toggler navbar-toggler-right"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="false"
-                aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="{% url 'home' %}">SustAgri</a>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="{% url 'home' %}">Home <span class="visually-hidden">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'about' %}">About</a>
-            </li>
-            {% if request.user.is_authenticated %}
-              <li class="nav-item">
-                <a class="nav-link"
-                   href="{% url 'users:detail' request.user.username %}">{% translate "My Profile" %}</a>
-              </li>
-              <li class="nav-item">
-                {# URL provided by django-allauth/account/urls.py #}
-                <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-              </li>
-            {% else %}
-              {% if ACCOUNT_ALLOW_REGISTRATION %}
-                <li class="nav-item">
-                  {# URL provided by django-allauth/account/urls.py #}
-                  <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
-                </li>
-              {% endif %}
-              <li class="nav-item">
-                {# URL provided by django-allauth/account/urls.py #}
-                <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-              </li>
-            {% endif %}
+            {% url 'license' as link %}
+            {% include "partials/buttons.html#btn-link" with id="license-button" label="License" href=link class="navbar-btn" %}
+
+            {% url 'imprint' as link %}
+            {% include "partials/buttons.html#btn-link" with id="imprint-button" label="Imprint" href=link class="navbar-btn" %}
+
+            {% url 'privacy' as link %}
+            {% include "partials/buttons.html#btn-link" with id="privacy-button" label="Privacy" href=link class="navbar-btn" %}
           </ul>
         </div>
-      </div>
-    </nav>
-  </div>
-  <div class="container">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-          {{ message }}
-          <button type="button"
-                  class="btn-close"
-                  data-bs-dismiss="alert"
-                  aria-label="Close"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
-    {% block main %}
-      {% block content %}
-        <p>Use this document as a way to quick start any new project.</p>
-      {% endblock content %}
-    {% endblock main %}
 
-  </div>
-  {% endblock body %}
-  <!-- /container -->
-  {% block modal %}
-  {% endblock modal %}
-  {% block inline_javascript %}
-    {% comment %}
-    Script tags with only code, no src (defer by default). To run
-    with a "defer" so that you run inline code:
-    <script>
-      window.addEventListener('DOMContentLoaded', () => {
-        /* Run whatever you want */
-      });
-    </script>
-    {% endcomment %}
-  {% endblock inline_javascript %}
-</body>
+      </footer>
+    {% endblock footer %}
+
+    <!-- bootstrap will be removed -->
+    <script src="{% static 'js/third_party/bootstrap.bundle.min.js' %}"></script>
+
+    {% block end_body_scripts %}{% endblock %}
+
+    <!-- javascript, check what it does -->
+    <script src="{% static 'js/project.js' %}"></script>
+    {% if messages %}
+      <script>
+        $(document).ready(function() {
+          var messagesModal = new bootstrap.Modal(document.getElementById('messagesModal'))
+          messagesModal.show();
+        });
+      </script>
+    {% endif %}
+  </body>
 </html>

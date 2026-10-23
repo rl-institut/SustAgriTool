@@ -1,0 +1,127 @@
+{% load static %}
+{% load i18n %}
+{% load custom_template_tags %}
+
+
+<nav x-data="{ open: false }" class="w-full bg-white">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+
+    <button type="button"
+      class="inline-flex items-center justify-center rounded-md p-2 lg:hidden"
+      @click="open = !open"
+      :aria-expanded="open"
+      aria-label="Toggle navigation">
+      <span aria-hidden="true">☰</span>
+    </button>
+
+    <a href="{% url 'projects:home' %}">
+      <img src="{% static 'assets/logos/SustAgriTool.svg' %}"
+           alt="SustAgriTool Logo" />
+    </a>
+
+    <!-- check this screen-size dependant behaviour -->
+    <div class="ml-auto hidden flex-col items-end gap-4 lg:flex lg:flex-row lg:items-center lg:gap-6"
+     :class="{ '!flex': open }">
+
+      <div class="flex items-center gap-4">
+        <!-- if-signup-tag needed? -->
+        {% if user.is_authenticated %}
+          {% if not in_project %}
+
+          {% if not in_project_list %}
+            {% url 'projects:projects_list' as link %}
+            {% include "partials/buttons.html#btn-link" with id="projects-list-button" label="My projects" href=link class="navbar-btn" %}
+          {% endif %}
+
+            {% url 'projects:project_create' as link %}
+            {% include "partials/buttons.html#btn-link" with id="new-project-button" label="New project" href=link class="navbar-btn" %}
+
+          {% endif %}
+        {% else %}
+          <!-- buttons for contact and license? -->
+        {% endif %}
+
+        <!-- Multiple documentations? Make the link flexible -->
+        {% url 'documentation' as link %}
+        {% include "partials/buttons.html#btn-link" with id="documentation-button" label="Documentation" href=link class="navbar-btn" %}
+      </div>
+
+      <div class="px-3">
+        <!-- modified login/signup/user handling -->
+        {% if user.is_authenticated %}
+          <li class="relative" x-data="{ profileOpen: false }">
+            <button type="button"
+              class="flex items-center rounded-md p-2"
+              @click="profileOpen = !profileOpen"
+              :aria-expanded="profileOpen"
+              aria-label="{% translate 'User menu' %}">
+              <img src="{% static 'assets/icons/i_profile.svg' %}"
+                alt=""
+                class="size-6"
+                aria-hidden="true">
+            </button>
+
+            <ul x-show="profileOpen"
+              x-cloak
+              @click.outside="profileOpen = false"
+              class="dropdown-container">
+              <li>
+                <a class="dropdown-item"
+                   href="{% url 'users:user_info' %}">
+                    {% translate "Account" %}
+                </a>
+              </li>
+              <li class="my-1 border-t border-neutral-200"></li>
+              <li>
+                <!-- Take care of log-out/user handling in general -->
+                <form>
+                    {% csrf_token %}
+                    <button type="submit"
+                      disabled
+                      class="dropdown-item">
+                      {% translate "Log out" %}
+                    </button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        {% else %}
+          {% comment %}
+          <!-- wait for proper user handling... -->
+          <li>
+            {% url 'projects:projects_list' as link %}
+            {% include "partials/buttons.html#btn-link" with id="log-in-button" label="My Projects" href=link class="navbar-btn" %}
+
+            {% url 'projects:project_create' as link %}
+            {% include "partials/buttons.html#btn-link" with id="sign-up-button" label="New Project" href=link class="navbar-btn" %}
+          </li>
+          {% endcomment %}
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="px-3">
+      <form action="{% url 'set_language' %}" method="post" id="language-switcher">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ request.get_full_path|custom_redir_lang }}" />
+        <select name="language"
+                onchange="this.form.submit()"
+                class="dropdown-item"
+                aria-label="{% translate 'Language' %}">
+
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
+
+          {% for language in languages %}
+            <option value="{{ language.code }}"
+                    {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+              {{ language.code|upper }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+  </div>
+</nav>

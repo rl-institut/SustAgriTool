@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+  {% translate "My account" %}
+{% endblock title %}
+
+{% block content %}
+<div>
+  <h1>{% translate "My account" %}</h1>
+  <!-- somehow include users/views.py user_detail_view and adapt url-pattern -->
+</div>
+{% endblock content %}
