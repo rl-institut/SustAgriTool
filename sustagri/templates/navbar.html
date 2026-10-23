@@ -2,108 +2,126 @@
 {% load i18n %}
 {% load custom_template_tags %}
 
-{% if signup %}
-  {% setvar "navbar--signup" as navbar_class %}
-{% elif scenario_create %}
-  {% setvar "navbar--scenario" as navbar_class %}
-{% else %}
-  {% setvar "" as navbar_class %}
-{% endif %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light {{ navbar_class }}">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'projects:home' %}">
-      <img src="{% static 'assets/logos/LogoOffgridplanner.svg' %}"
-           alt="Offgridplanner Logo" />
-    </a>
-    <button class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+
+<nav x-data="{ open: false }" class="w-full bg-white">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+
+    <button type="button"
+      class="inline-flex items-center justify-center rounded-md p-2 lg:hidden"
+      @click="open = !open"
+      :aria-expanded="open"
+      aria-label="Toggle navigation">
+      <span aria-hidden="true">☰</span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mb-2 mb-lg-0">
-        {% if not scenario_create %}
-          <li class="nav-item">
-            <a class="nav-link"
-               href="{{ documentation_url }}"
-               target="_blank"
-               rel="noreferrer">{% translate "Documentation" %}</a>
-          </li>
-        {% elif signup %}
-          <!--For user signup the nav bar does not display all options-->
-        {% endif %}
-        <li class="nav-item dropdown locale" id="language-switcher">
-          <form action="{% url 'set_language' %}" method="post">
-            {% csrf_token %}
-            <input name="next" type="hidden" value="{{ request.get_full_path|custom_redir_lang }}" />
-            <select class="selectpicker" name="language" onchange="this.form.submit()">
-              {% get_current_language as LANGUAGE_CODE %}
-              {% get_available_languages as LANGUAGES %}
-              {% get_language_info_list for LANGUAGES as languages %}
-              {% for language in languages %}
-                <option class="nav-link"
-                        value="{{ language.code }}"
-                        {% if language.code == LANGUAGE_CODE %}selected="selected"{% endif %}>
-                  {{ language.code }}
-                </option>
-              {% endfor %}
-            </select>
-          </form>
-        </li>
+
+    <a href="{% url 'projects:home' %}">
+      <img src="{% static 'assets/logos/SustAgriTool.svg' %}"
+           alt="SustAgriTool Logo" />
+    </a>
+
+    <!-- check this screen-size dependant behaviour -->
+    <div class="ml-auto hidden flex-col items-end gap-4 lg:flex lg:flex-row lg:items-center lg:gap-6"
+     :class="{ '!flex': open }">
+
+      <div class="flex items-center gap-4">
+        <!-- if-signup-tag needed? -->
         {% if user.is_authenticated %}
-          {% if project %}
-          <li class="nav-item proj-info">
-              {{ user.email }}<br>
-              {{ project.name }}
-          </li>
+          {% if not in_project %}
+
+          {% if not in_project_list %}
+            {% url 'projects:projects_list' as link %}
+            {% include "partials/buttons.html#btn-link" with id="projects-list-button" label="My projects" href=link class="navbar-btn" %}
           {% endif %}
-          <li class="nav-item dropdown profile">
-            <a class="nav-link dropdown-toggle"
-               href="#"
-               id="navbarDropdown"
-               role="button"
-               data-bs-toggle="dropdown"
-               aria-expanded="false">
-              <img src="{% static 'assets/icons/i_profile.svg' %}" alt="Profile icon" />
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+            {% url 'projects:project_create' as link %}
+            {% include "partials/buttons.html#btn-link" with id="new-project-button" label="New project" href=link class="navbar-btn" %}
+
+          {% endif %}
+        {% else %}
+          <!-- buttons for contact and license? -->
+        {% endif %}
+
+        <!-- Multiple documentations? Make the link flexible -->
+        {% url 'documentation' as link %}
+        {% include "partials/buttons.html#btn-link" with id="documentation-button" label="Documentation" href=link class="navbar-btn" %}
+      </div>
+
+      <div class="px-3">
+        <!-- modified login/signup/user handling -->
+        {% if user.is_authenticated %}
+          <li class="relative" x-data="{ profileOpen: false }">
+            <button type="button"
+              class="flex items-center rounded-md p-2"
+              @click="profileOpen = !profileOpen"
+              :aria-expanded="profileOpen"
+              aria-label="{% translate 'User menu' %}">
+              <img src="{% static 'assets/icons/i_profile.svg' %}"
+                alt=""
+                class="size-6"
+                aria-hidden="true">
+            </button>
+
+            <ul x-show="profileOpen"
+              x-cloak
+              @click.outside="profileOpen = false"
+              class="dropdown-container">
               <li>
-                <a class="dropdown-item" href="{% url 'projects:home' %}">{% translate "My Projects" %}</a>
+                <a class="dropdown-item"
+                   href="{% url 'users:user_info' %}">
+                    {% translate "Account" %}
+                </a>
               </li>
-              <!-- account.html -->
+              <li class="my-1 border-t border-neutral-200"></li>
               <li>
-                <a class="dropdown-item" href="{% url 'about' %}">{% translate "Contact" %}</a>
-              </li>
-              <!-- about.html -->
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
-              <li>
-                <form action="{% url 'account_logout' %}" method="POST">
-                  {% csrf_token %}
-                <button class="dropdown-item" type="submit">{% translate "Log out" %}</button>
+                <!-- Take care of log-out/user handling in general -->
+                <form>
+                    {% csrf_token %}
+                    <button type="submit"
+                      disabled
+                      class="dropdown-item">
+                      {% translate "Log out" %}
+                    </button>
                 </form>
               </li>
             </ul>
           </li>
         {% else %}
-          <li class="nav-item">
-            <!-- pages/projects-view-empty.html -->
-            <a class="nav-link" href="{% url 'account_login' %}">{% translate "Log in" %}</a>
-            <!--a class="nav-link" href="{# url 'login' #}">{% translate "Log in" %}</a-->
+          {% comment %}
+          <!-- wait for proper user handling... -->
+          <li>
+            {% url 'projects:projects_list' as link %}
+            {% include "partials/buttons.html#btn-link" with id="log-in-button" label="My Projects" href=link class="navbar-btn" %}
+
+            {% url 'projects:project_create' as link %}
+            {% include "partials/buttons.html#btn-link" with id="sign-up-button" label="New Project" href=link class="navbar-btn" %}
           </li>
-          <li class="nav-item">
-            <!-- pages/signup.html -->
-            <a class="btn btn--small"
-               href="{% url 'account_signup' %}"
-               role="button">{% translate "Sign up" %}</a>
-          </li>
+          {% endcomment %}
         {% endif %}
-      </ul>
+      </div>
     </div>
+
+    <div class="px-3">
+      <form action="{% url 'set_language' %}" method="post" id="language-switcher">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ request.get_full_path|custom_redir_lang }}" />
+        <select name="language"
+                onchange="this.form.submit()"
+                class="dropdown-item"
+                aria-label="{% translate 'Language' %}">
+
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
+
+          {% for language in languages %}
+            <option value="{{ language.code }}"
+                    {% if language.code == LANGUAGE_CODE %}selected{% endif %}>
+              {{ language.code|upper }}
+            </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
   </div>
 </nav>
