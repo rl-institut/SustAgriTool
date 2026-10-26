@@ -367,6 +367,10 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+# Mapbox
 # TODO: create new token for sustagri and use github secrets?
 # TODO: confirm if we use this mapbox map or smth else
 MAPBOX_ACCESS_TOKEN = env("MAPBOX_ACCESS_TOKEN")
+# Weather Data
+WEATHER_DATA_API_HOST = env("WEATHER_DATA_API_HOST")
+
