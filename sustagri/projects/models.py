@@ -1,5 +1,17 @@
 from django.db import models
 from django.forms.models import model_to_dict
+from django.contrib.postgres.fields import ArrayField
+from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator
+
+# TODO: move this elsewhere and adapt units
+TIMESERIES_UNITS = (
+    ("Wh", "Wh"),
+    ("kWh", "kWh"),
+    ("MWh", "MWh"),
+    ("GWh", "GWh"),
+    ("TWh", "TWh"),
+)
 
 
 class Project(models.Model):
@@ -22,4 +34,20 @@ class Project(models.Model):
         """
         dm = model_to_dict(self, exclude=["id"])#, "user", "viewers"])
         return dm
+
+
+
+class Timeseries(models.Model):
+    name = models.CharField(max_length=120, blank=True, default="")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True)
+
+    # TODO: include user
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+
+    values = ArrayField(models.FloatField(), blank=False, default=list([]))
+    units = models.CharField(max_length=50, choices=TIMESERIES_UNITS, blank=True, null=True)
+
+    start_time = models.DateTimeField(blank=True, default=None, null=True)
+    end_time = models.DateTimeField(blank=True, default=None, null=True)
+    time_step = models.IntegerField(blank=True, default=None, null=True, validators=[MinValueValidator(1)])
 

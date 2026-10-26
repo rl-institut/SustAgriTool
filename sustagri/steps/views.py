@@ -1,11 +1,15 @@
 import logging
+import json
+
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 
 from sustagri.projects.forms import *
+from sustagri.steps.helpers import *
 
 logger = logging.getLogger(__name__)
 
@@ -56,17 +60,96 @@ def site_conditions(request, proj_id):
     project = get_object_or_404(Project, id=proj_id)
     step_id, step_info = get_step_id_and_info("site_conditions")
 
-    return render(
-        request,
-        "pages/site_conditions.html",
-        {
+    # TODO: user handling
+    # if (project.user != request.user) and (
+    #     project.viewers.filter(user__email=request.user.email, share_rights="edit").exists() is False
+    # ):
+    #     raise PermissionDenied
+
+    context = {
             "proj_id": proj_id,
             "step_id": step_id,
             "proj_name": project.name,
             "page_information": step_info,
             "step_list": step_list,
-        },
-    )
+        }
+
+    if request.method == "GET":
+        timeseries = get_weather_data(proj_id, raw=False)
+
+        timeseries_labels = {
+            "ghi": "Global Horizontal irradiance [W/m²]",
+            "t_air": "Temperature [°C]",
+            "t_dew": "Dewpoint Temperature[°C]",
+            "windspeed": "Windspeed at 100 meters [m/s]",
+            "fsr": "Forecast Surface Roughness (m)",
+            "tp": "Precipitation [mm]",
+            "e": "Evapotranspiration [mm]",
+            "cf_aware": "Water Scarcity Footprint Factor [dimensionless]",
+        }
+        context.update(
+            {
+                # TODO: Retrieve timestamps from weather data directly or make project itself time aware
+                # "timestamps": scenario.get_timestamps(json_format=True),
+                "timeseries": json.dumps(timeseries),
+                "timeseries_keys": timeseries_labels,
+                "test": "test",
+            }
+        )
+
+        # TODO: modify template, how to handle old css and js code?
+        #   -> clarify visualization (plots) first!
+        return render(request, "pages/site_conditions.html", context)
+
+    if request.method == "POST":
+        # TODO
+        return HttpResponseRedirect(reverse("wefe_steps", args=[proj_id, step_id + 1]))
+
+def wefe_resources(request, proj_id, step_id=STEP_MAPPING["resources"]):
+    project = get_object_or_404(Project, id=proj_id)
+
+    if (project.user != request.user) and (
+        project.viewers.filter(user__email=request.user.email, share_rights="edit").exists() is False
+    ):
+        raise PermissionDenied
+
+    scenario = project.scenario
+    page_information = "Renewable energy potential for the selected site"
+    context = {
+        "proj_id": proj_id,
+        "proj_name": project.name,
+        "step_id": step_id,
+        "step_list": WEFE_STEP_VERBOSE,
+        "page_information": page_information,
+    }
+
+    if request.method == "GET":
+        timeseries = get_renewables_output(proj_id, raw=False)
+
+        timeseries_labels = {
+            "ghi": "Global Horizontal irradiance [W/m²]",
+            "t_air": "Temperature [°C]",
+            "t_dew": "Dewpoint Temperature[°C]",
+            "windspeed": "Windspeed at 100 meters [m/s]",
+            "fsr": "Forecast Surface Roughness (m)",
+            "tp": "Precipitation [mm]",
+            "e": "Evapotranspiration [mm]",
+            "cf_aware": "Water Scarcity Footprint Factor [dimensionless]",
+        }
+        context.update(
+            {
+                "timestamps": scenario.get_timestamps(json_format=True),
+                "timeseries": json.dumps(timeseries),
+                "timeseries_keys": timeseries_labels,
+                "test": "test",
+            }
+        )
+
+        return render(request, "wefe/steps/resources.html", context)
+
+    if request.method == "POST":
+        # TODO
+        return HttpResponseRedirect(reverse("wefe_steps", args=[proj_id, step_id + 1]))
 
 
 def survey(request, proj_id):
