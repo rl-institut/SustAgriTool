@@ -44,7 +44,7 @@ class Timeseries(models.Model):
     # TODO: include user
     # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
 
-    values = ArrayField(models.FloatField(), blank=False, default=list([]))
+    values = ArrayField(models.FloatField(), blank=False, default=list)
     units = models.CharField(max_length=50, choices=TIMESERIES_UNITS, blank=True, null=True)
 
     start_time = models.DateTimeField(blank=True, default=None, null=True)
