@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_http_methods
 
 from sustagri.projects.forms import *
 from sustagri.steps.helpers import *
@@ -27,6 +28,7 @@ STEPS = {
 step_list = list(STEPS.values())
 
 
+@require_http_methods(["GET", "POST"])
 def project_information(request, proj_id):
     project = get_object_or_404(Project, id=proj_id)
     step_id, step_info = get_step_id_and_info("project_information")
@@ -56,6 +58,7 @@ def project_information(request, proj_id):
     )
 
 
+@require_http_methods(["GET", "POST"])
 def site_conditions(request, proj_id):
     project = get_object_or_404(Project, id=proj_id)
     step_id, step_info = get_step_id_and_info("site_conditions")
@@ -105,12 +108,69 @@ def site_conditions(request, proj_id):
 
     if request.method == "POST":
         # TODO
-        return HttpResponseRedirect(reverse("wefe_steps", args=[proj_id, step_id + 1]))
+        return HttpResponseRedirect(reverse("steps:ogp_steps", args=[proj_id, step_id + 1]))
 
 
+@require_http_methods(["GET", "POST"])
 def survey(request, proj_id):
     project = get_object_or_404(Project, id=proj_id)
     step_id, step_info = get_step_id_and_info("survey")
+
+    # TODO: we do not use scenario model -> use project.id instead?
+    # TODO: Implement SurveyQuestionForm first -> decide on survey structure and categories before
+    scen_id = project.scenario.id
+    if request.method == "POST":
+        form = SurveyQuestionForm(request.POST, qs=SurveyAnswer.objects.filter(scenario_id=scen_id))
+
+        if form.is_valid():
+            qs = SurveyAnswer.objects.filter(scenario_id=scen_id)
+            with open(f"scenario_{scen_id}_survey_answers.json", "w") as fp:
+                json.dump(form.cleaned_data, fp, indent=4)
+            for criteria_num, value in form.cleaned_data.items():
+                crit = qs.get(question_id=criteria_num.replace("criteria_", ""))
+                crit.value = json.dumps(value) if not isinstance(value, str) else value
+                crit.save(update_fields=["value"])
+
+            return HttpResponseRedirect(reverse("steps:ogp_steps", args=[proj_id, step_id + 1]))
+
+    else:
+        if scen_id is None:
+            last_scenario_id = (
+                SurveyAnswer.objects.all().values_list("scenario_id", flat=True).distinct().order_by().last()
+            )
+            if last_scenario_id is None:
+                last_scenario_id = 0
+            scenario_id = last_scenario_id + 1
+            return HttpResponseRedirect(reverse("view_survey", args=[scenario_id]))
+        else:
+            scenario_id = scen_id
+
+            # Check if answers already exists, if not create them
+            qs_answer = SurveyAnswer.objects.filter(scenario_id=scenario_id)
+            create_new_form = False
+            if qs_answer.exists():
+                try:
+                    form = SurveyQuestionForm(qs=qs_answer)
+                # Could be caused by outdated survey answers
+                except ObjectDoesNotExist:
+                    create_new_form = True
+                    pass
+            else:
+                create_new_form = True
+
+            if create_new_form:
+                questions = SurveyQuestion.objects.all()
+                print(questions)
+                for question in questions:
+                    # print(question)
+                    answer_param = {}
+                    answer_param["scenario_id"] = scenario_id
+                    answer_param["question"] = question
+                    new_answer = SurveyAnswer(**answer_param)
+                    new_answer.save()
+                qs_answer = SurveyAnswer.objects.filter(scenario_id=scenario_id)
+
+                form = SurveyQuestionForm(qs=qs_answer)
 
     return render(
         request,
@@ -123,6 +183,7 @@ def survey(request, proj_id):
             "step_list": step_list,
         },
     )
+
 
 
 def agroforestry_practices(request, proj_id):
