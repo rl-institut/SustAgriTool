@@ -39,9 +39,11 @@
     }
 
     .dropdown-item {
-        @apply block w-full rounded-sm px-4 py-2 hover:bg-neutral-100 cursor-pointer;
+        @apply block w-full px-4 py-2 text-left hover:bg-neutral-100 cursor-default;
     }
 }
+
+
 
 
 [x-cloak] {

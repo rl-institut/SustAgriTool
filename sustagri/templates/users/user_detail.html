@@ -1,44 +1,57 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% load static %}
+{% block title %}{% translate "Account" %}{% endblock title %}
 
-{% block title %}
-  User: 
-  
-    {{ object.username }}
-  
-  
-{% endblock title %}
 {% block content %}
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-12">
-        <h2>
-        
-        
-          {{ object.username }}
-        
-      </h2>
-      {% if object.name %}
-        <p>{{ object.name }}</p>
-      {% endif %}
+<section class="mx-auto max-w-2xl">
+    <h1 class="mb-6 text-center">{% translate "Account" %}</h1>
+
+    <div class="space-y-2">
+        <p><strong>{% translate "Username" %}:</strong> {{ object.username }}</p>
+        <p><strong>{% translate "Email" %}:</strong> {{ object.email }}</p>
+
+        {% if object.name %}
+            <p><strong>{% translate "Name" %}:</strong> {{ object.name }}</p>
+        {% endif %}
     </div>
-  </div>
-  {% if object == request.user %}
-    <!-- Action buttons -->
-    <div class="row">
-      <div class="col-sm-12">
-        <a class="btn btn-primary" href="{% url 'users:update' %}" role="button">My Info</a>
-        <a class="btn btn-primary"
-           href="{% url 'account_email' %}"
-           role="button">E-Mail</a>
-        <a class="btn btn-primary"
-           href="{% url 'mfa_index' %}"
-           role="button">MFA</a>
-        <!-- Your Stuff: Custom user template urls -->
-      </div>
-    </div>
-    <!-- End Action buttons -->
-  {% endif %}
-</div>
+
+    {% if object == request.user %}
+        <div class="mt-8 flex flex-wrap gap-3">
+            {% url 'users:update' as link %}
+            {% include "partials/buttons.html#btn-link" with id="edit-profile-button" label="Edit profile" href=link class="wizard-btn" %}
+
+            {% url 'account_email' as link %}
+            {% include "partials/buttons.html#btn-link" with id="email-settings-button" label="Email settings" href=link class="wizard-btn" %}
+
+            {% url 'account_change_password' as link %}
+            {% include "partials/buttons.html#btn-link" with id="change-password-button" label="Change password" href=link class="wizard-btn" %}
+        </div>
+        <div class="mt-10 border-t border-neutral-200 pt-6">
+            <h2 class="mb-2 text-red-700">
+                {% translate "Delete account" %}
+            </h2>
+
+            <p class="mb-4 text-sm text-neutral-600">
+                {% translate "This permanently deletes your account and all associated data." %}
+            </p>
+
+            <form
+                method="post"
+                action="{% url 'users:delete' %}"
+                x-data
+                @submit.prevent="if (confirm('Are you sure you want to permanently delete your account?\nThis cannot be undone.')) $el.submit()"
+            >
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="rounded-md px-3 py-2 font-medium text-red-600 hover:bg-red-50 focus:ring-red-500 cursor-pointer"
+                >
+                    {% translate "Delete account" %}
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</section>
 {% endblock content %}

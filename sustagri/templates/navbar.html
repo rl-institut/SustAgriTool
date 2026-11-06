@@ -21,7 +21,7 @@
 
     <!-- check this screen-size dependant behaviour -->
     <div class="ml-auto hidden flex-col items-end gap-4 lg:flex lg:flex-row lg:items-center lg:gap-6"
-     :class="{ '!flex': open }">
+      :class="{ '!flex': open }">
 
       <div class="flex items-center gap-4">
         <!-- if-signup-tag needed? -->
@@ -49,7 +49,7 @@
       <div class="px-3">
         <!-- modified login/signup/user handling -->
         {% if user.is_authenticated %}
-          <li class="relative" x-data="{ profileOpen: false }">
+          <div class="relative" x-data="{ profileOpen: false }">
             <button type="button"
               class="flex items-center rounded-md p-2"
               @click="profileOpen = !profileOpen"
@@ -66,36 +66,33 @@
               @click.outside="profileOpen = false"
               class="dropdown-container">
               <li>
-                <a class="dropdown-item"
-                   href="{% url 'users:user_info' %}">
-                    {% translate "Account" %}
+                <a class="dropdown-item" href="{{ user.get_absolute_url }}">
+                  {% translate "Account" %}
                 </a>
               </li>
               <li class="my-1 border-t border-neutral-200"></li>
               <li>
-                <!-- Take care of log-out/user handling in general -->
-                <form>
+                <form method="post" action="{% url 'account_logout' %}">
                     {% csrf_token %}
-                    <button type="submit"
-                      disabled
-                      class="dropdown-item">
+                    <button type="submit" class="dropdown-item">
                       {% translate "Log out" %}
                     </button>
                 </form>
               </li>
             </ul>
-          </li>
+          </div>
         {% else %}
-          {% comment %}
-          <!-- wait for proper user handling... -->
-          <li>
-            {% url 'projects:projects_list' as link %}
-            {% include "partials/buttons.html#btn-link" with id="log-in-button" label="My Projects" href=link class="navbar-btn" %}
+          <div>
+            <ul>
+              <li>
+                {% url 'account_login' as link %}
+                {% include "partials/buttons.html#btn-link" with id="navbar-login-button" label="Log in" href=link class="navbar-btn" %}
 
-            {% url 'projects:project_create' as link %}
-            {% include "partials/buttons.html#btn-link" with id="sign-up-button" label="New Project" href=link class="navbar-btn" %}
-          </li>
-          {% endcomment %}
+                {% url 'account_signup' as link %}
+                {% include "partials/buttons.html#btn-link" with id="navbar-signup-button" label="Sign up" href=link class="navbar-btn" %}
+              </li>
+            </ul>
+          </div>
         {% endif %}
       </div>
     </div>
