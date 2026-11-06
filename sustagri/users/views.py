@@ -9,7 +9,10 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 from django.views.generic import UpdateView
-from django.shortcuts import render
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
 
 from sustagri.users.models import User
 
@@ -52,3 +55,13 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 user_redirect_view = UserRedirectView.as_view()
 
+
+@login_required
+@require_POST
+def user_delete_view(request):
+    user = request.user
+
+    logout(request)
+    user.delete()
+
+    return redirect("projects:home")
