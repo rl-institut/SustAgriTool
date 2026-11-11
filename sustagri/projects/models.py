@@ -6,6 +6,8 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
 
+from sustagri.projects.forms import SURVEY_QUESTIONS_CATEGORIES
+
 # TODO: move this elsewhere and adapt units
 TIMESERIES_UNITS = (
     ("Wh", "Wh"),
@@ -64,12 +66,12 @@ class SurveyQuestion(models.Model):
     matrix_answers = models.BooleanField(default=False)
     answer_type = models.CharField(null=False, max_length=8)
     description = models.TextField(null=False, default="")
-    # category = models.CharField(
-    #     max_length=60,
-    #     null=True,
-    #     blank=False,
-    #     choices=[(k, v) for k, v in SURVEY_QUESTIONS_CATEGORIES.items()],
-    # )
+    category = models.CharField(
+        max_length=60,
+        null=True,
+        blank=False,
+        choices=[(k, v) for k, v in SURVEY_QUESTIONS_CATEGORIES.items()],
+    )
 
     @property
     def id(self):
@@ -88,7 +90,7 @@ class SurveyAnswer(models.Model):
     question = models.ForeignKey(SurveyQuestion, on_delete=models.CASCADE, null=True, blank=False)
     value = models.TextField(null=True)
     # TODO make this a ForeignKey
-    scenario_id = models.IntegerField(null=False)
+    project_id = models.IntegerField(null=False)
 
     def export(self, ignore_empty=False):
         if ignore_empty is True and self.value is None:
