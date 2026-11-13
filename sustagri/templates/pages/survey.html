@@ -1,4 +1,125 @@
-{% extends "step_progression.html" %}
+{% extends 'step_progression.html' %}
+
+{% load tailwind_filters %}
+{% load i18n %}
+{% load tags_utils %}
+
 
 {% block progression_content %}
+
+<section class="mx-auto max-w-7xl">
+	<p class="mb-4 text-sm text-neutral-700">
+		<b>Note:</b> Information submitted under "other” will not be considered during modelling, and is only collected for future development.
+	</p>
+
+	<form id="surveyQuestions" action="{% url 'submit_survey' proj_id %}" method="POST">
+		{% csrf_token %}
+
+		<div class="space-y-3" id="accordionQuestions">
+			{% for cat in categories %}
+
+			<div
+				class="survey-accordion-item"
+				x-data="{ open: {% if forloop.first or cat in faulty_fields_cat %}true{% else %}false{% endif %} }"
+			>
+				<h3 id="heading-{{ forloop.counter }}">
+					<button
+						class="survey-accordion-button"
+						type="button"
+						@click="open = !open"
+						:aria-expanded="open"
+						aria-controls="collapse-{{ forloop.counter }}"
+					>
+						{{ categories_verbose|get_item:cat }}
+					</button>
+				</h3>
+
+				<div
+					id="collapse-{{ forloop.counter }}"
+					x-show="open"
+					x-cloak
+					aria-labelledby="heading-{{ forloop.counter }}"
+				>
+					<div class="cpn-business__questionnaire p-4">
+
+						{% setvar False as matrix_current %}
+
+						{% for field in form %}
+							{% if categories_map|get_index:forloop.counter0|is_current_category:cat %}
+
+								{% if field|is_matrix %}
+
+									{% comment %} here are the subquestion in matrix form {% endcomment %}
+									{{ field }}
+
+									{% for error in field.errors %}
+										<div>
+											<p class="font-bold text-red-600">{{ error }}</p>
+										</div>
+									{% endfor %}
+
+								{% else %}
+
+									<div class="form-group{% if field.errors %} invalid{% endif %}{% if field|is_subsubquestion %} subsubquestion{% endif %}{% if field|is_subquestion %} subquestion{% if field.initial %}{% else %} disabled {% endif %}{% endif %}">
+
+										{% if field.label|is_water_header %}
+											<h4>{{ field.label|is_water_header }}</h4>
+										{% endif %}
+
+										{{ field|as_crispy_field }}
+									</div>
+
+									{% if field|is_matrix_source %}
+										{% if matrix_current %}
+											This text should never be seen
+										{% else %}
+
+											{% comment %} here are begins the subquestion matrix container {% endcomment %}
+											{% setvar True as matrix_current %}
+
+											<div
+												id="id_matrix_{{ field.name }}"
+												class="form-group container_matrix{% if field.errors %} invalid{% endif %}{% if field|is_subsubquestion %} subsubquestion{% endif %}{% if field|is_subquestion %} subquestion{% if field.initial %}{% else %} disabled{% endif %}{% endif %}"
+											>
+												<span class="sub_question sub_sub_question matrix_target matrix_row_0 matrix_col_1"></span>
+
+												{% for header in matrix_labels|get_item:field.name %}
+													<span class="sub_question sub_sub_question matrix_target label_row_{{ forloop.counter }} matrix_row_{{ forloop.counter }} matrix_col_1">
+														{{ header }}
+													</span>
+												{% endfor %}
+
+												{% for header in matrix_headers|get_item:field.name %}
+													<div class="sub_question sub_sub_question matrix_target matrix_row_0 matrix_col_{{ forloop.counter|add:1 }}">
+														{{ header }}
+													</div>
+												{% endfor %}
+
+										{% endif %}
+									{% else %}
+										{% if matrix_current %}
+											{% setvar False as matrix_current %}
+											</div>
+										{% endif %}
+									{% endif %}
+
+								{% endif %}
+							{% endif %}
+						{% endfor %}
+
+					</div>
+				</div>
+			</div>
+
+			{% endfor %}
+
+		</div>
+	</form>
+</section>
 {% endblock progression_content %}
+
+{% block next_btn %}
+    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="surveyQuestions" class="wizard-btn" %}
+{% endblock next_btn %}
+
+

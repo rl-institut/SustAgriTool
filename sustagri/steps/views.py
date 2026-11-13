@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods
 
 from sustagri.projects.forms import *
 from sustagri.steps.helpers import *
+from sustagri.steps.survey import *
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +164,7 @@ def survey(request, proj_id):
                     new_answer.save()
                 qs_answer = SurveyAnswer.objects.filter(project_id=project_id)
 
+                import pdb; pdb.set_trace()
                 form = SurveyQuestionForm(qs=qs_answer)
 
     categories = [cat for cat in SURVEY_QUESTIONS_CATEGORIES.keys()]

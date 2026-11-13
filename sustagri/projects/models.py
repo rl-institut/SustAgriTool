@@ -6,7 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
 
-from sustagri.projects.forms import SURVEY_QUESTIONS_CATEGORIES
+from sustagri.steps.survey import *
 
 # TODO: move this elsewhere and adapt units
 TIMESERIES_UNITS = (
