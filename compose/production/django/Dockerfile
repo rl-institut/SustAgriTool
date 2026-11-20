@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # psycopg dependencies
   libpq-dev
 
+COPY pyproject.toml uv.lock ${APP_HOME}/
 
 # Requirements are installed here to ensure they will be cached.
 # RUN --mount=type=cache,target=/root/.cache/uv \
