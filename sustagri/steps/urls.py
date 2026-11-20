@@ -23,11 +23,10 @@ urlpatterns = [
         name="site_conditions",
     ),
 
-    path(
-        "survey/<int:proj_id>",
-        survey,
-        name="survey",
-    ),
+    path("<int:proj_id>/survey", survey, name="survey"),
+    path("<int:proj_id>/submit/survey", survey, name="submit_survey"),
+    path("<int:proj_id>/view/survey", survey, name="view_survey"),
+
     path(
         "agroforestry_practices/<int:proj_id>",
         agroforestry_practices,
