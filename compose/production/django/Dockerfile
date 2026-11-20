@@ -1,4 +1,3 @@
-
 # define an alias for the specific python version used in this file.
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS python-build-stage
 
@@ -89,4 +88,4 @@ RUN DATABASE_URL="postgres://dummy" \
   DJANGO_SETTINGS_MODULE="config.settings.test" \
   python manage.py compilemessages
 
-ENTRYPOINT ["/entrypoint"]
+CMD ${STARTUP_COMMAND}
