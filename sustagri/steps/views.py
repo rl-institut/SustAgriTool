@@ -76,8 +76,9 @@ def site_conditions(request, proj_id):
 
     if request.method == "GET":
         timeseries = get_weather_data(proj_id, raw=False)
-        logger.info("Got the timeseries")
-        print(timeseries.keys())
+
+        # TODO: Retrieve timestamps from weather data directly or make project itself time aware
+        timestamps = None
 
         timeseries_labels = {
             "ghi": "Global Horizontal irradiance [W/m²]",
@@ -91,16 +92,13 @@ def site_conditions(request, proj_id):
         }
         context.update(
             {
-                # TODO: Retrieve timestamps from weather data directly or make project itself time aware
-                # "timestamps": scenario.get_timestamps(json_format=True),
+                "timestamps": json.dumps(timestamps),
                 "timeseries": json.dumps(timeseries),
                 "timeseries_keys": timeseries_labels,
                 "test": "test",
             }
         )
 
-        # TODO: modify template, how to handle old css and js code?
-        #   -> clarify visualization (plots) first!
         return render(request, "pages/site_conditions.html", context)
 
     if request.method == "POST":
