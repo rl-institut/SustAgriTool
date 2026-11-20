@@ -1,9 +1,69 @@
 {% extends "step_progression.html" %}
+{% load static %}
+{% load i18n %}
+
+
+{% block start_body_scripts %}
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.21/jquery.csv.min.js"
+    integrity="sha512-Y8iWYJDo6HiTo5xtml1g4QqHtl/PO1w+dmUpQfQSOTqKNsMhExfyPN2ncNAe9JuJUSKzwK/b6oaNPop4MXzkwg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer">
+</script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.20.0/plotly.min.js"
+    integrity="sha512-tuzZby9zsxdCMgqKMHo+ObEWrfBTFlKZ7yIHSow5IYbr0JseLNTXm37NSn0rrWVbvKMfvGUCSm5L1sK9QGuLyw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer">
+</script>
+
+<script src="{% static 'js/traceplot.js' %}"></script>
+
+<script>
+    const data = JSON.parse(`{{ timeseries|escapejs }}`);
+    const timestamps = {{ timestamps|safe }};
+</script>
+{% endblock start_body_scripts %}
+
 
 {% block progression_content %}
 
-<h2>Site Conditions</h2>
+<section class="mx-auto max-w-7xl">
+    <form id="site-conditions-form" method="POST" action="">
+        {% csrf_token %}
+    </form>
 
-<p>Climate, soil, location etc.</p>
+    <div class="space-y-8">
+        {% for ts_id, verbose in timeseries_keys.items %}
+            <div>
+                <h3 class="mb-2">
+                    {{ verbose }}
+                </h3>
+
+                <div id="weather_data_{{ ts_id }}_ts"></div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
 
 {% endblock progression_content %}
+
+
+{% block next_btn %}
+    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="site-conditions-form" class="wizard-btn" %}
+{% endblock next_btn %}
+
+
+{% block end_body_scripts %}
+<script>
+    Object.entries(data).forEach(([key, value]) => {
+        makePlotly(
+            timestamps,
+            value,
+            `${key}_ts`,
+            {hovermode: "x unified"}
+        );
+    });
+</script>
+{% endblock end_body_scripts %}
