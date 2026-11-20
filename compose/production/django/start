@@ -10,7 +10,7 @@ echo MIGRATE
 python /app/manage.py showmigrations
 python /app/manage.py migrate
 echo UPDATE SURVEY
-python /app/manage.py update_survey_questions
+# python /app/manage.py update_survey_questions
 echo UPDATETRANSLATIONS
 python /app/manage.py compilemessages
 
