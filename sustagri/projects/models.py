@@ -1,10 +1,8 @@
-import json
-
 from django.db import models
 from django.forms.models import model_to_dict
 from django.contrib.postgres.fields import ArrayField
-from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
+from django.conf import settings
 
 from sustagri.steps.survey import *
 
@@ -23,7 +21,7 @@ class Project(models.Model):
     description = models.CharField(max_length=201, blank=True, default="")
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects", null=True)
     # options = models.ForeignKey(Options, on_delete=models.SET_NULL, null=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)

@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.decorators import login_not_required
 from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
@@ -23,11 +24,11 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # Content without views
     # TODO: "about" and "documentation" two separate things?
-    path("documentation/", TemplateView.as_view(template_name="info/documentation.html"), name="documentation"),
-    path("contact/", TemplateView.as_view(template_name="info/contact.html"), name="contact"),
-    path("license/", TemplateView.as_view(template_name="info/license.html"), name="license"),
-    path("imprint/", TemplateView.as_view(template_name="info/imprint.html"), name="imprint"),
-    path("privacy/", TemplateView.as_view(template_name="info/privacy.html"), name="privacy"),
+    path("documentation/", login_not_required(TemplateView.as_view(template_name="info/documentation.html")), name="documentation"),
+    path("contact/", login_not_required(TemplateView.as_view(template_name="info/contact.html")), name="contact"),
+    path("license/", login_not_required(TemplateView.as_view(template_name="info/license.html")), name="license"),
+    path("imprint/", login_not_required(TemplateView.as_view(template_name="info/imprint.html")), name="imprint"),
+    path("privacy/", login_not_required(TemplateView.as_view(template_name="info/privacy.html")), name="privacy"),
     # Content with views
     # TODO: refactor templates from /pages/ to /steps/ ?
     path("steps/", include("sustagri.steps.urls", namespace="steps")),

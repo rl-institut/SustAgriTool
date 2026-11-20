@@ -27,7 +27,7 @@ step_list = list(STEPS.values())
 
 @require_http_methods(["GET", "POST"])
 def project_information(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("project_information")
 
     if request.POST:
@@ -57,7 +57,7 @@ def project_information(request, proj_id):
 
 @require_http_methods(["GET", "POST"])
 def site_conditions(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("site_conditions")
 
     # TODO: user handling
@@ -108,7 +108,7 @@ def site_conditions(request, proj_id):
 
 @require_http_methods(["GET", "POST"])
 def survey(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("survey")
 
     if request.method == "POST":
@@ -220,7 +220,7 @@ def survey(request, proj_id):
 
 
 def agroforestry_practices(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("agroforestry_practices")
 
     return render(
@@ -237,7 +237,7 @@ def agroforestry_practices(request, proj_id):
 
 
 def relevant_policies(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("relevant_policies")
 
     return render(
@@ -254,7 +254,7 @@ def relevant_policies(request, proj_id):
 
 
 def business_models(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("business_models")
 
     return render(
@@ -271,7 +271,7 @@ def business_models(request, proj_id):
 
 
 def example_case_studies(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("example_case_studies")
 
     return render(
