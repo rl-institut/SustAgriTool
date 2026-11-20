@@ -1,50 +1,46 @@
-
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
 {% load i18n %}
-
 {% load tailwind_filters %}
 
-{% block title %}{% translate "Log In" %}{% endblock title %}
+{% block title %}
+  {% translate "Log in" %}
+{% endblock title %}
 
+{% block content %}
+  <section class="mx-auto max-w-md">
+    <h1 class="mb-6 text-center">
+      {% translate "Log in" %}
+    </h1>
 
-{% block index %}
-
-<main class="signup">
-  <div id="msgBox"
-       class="modal"
-       style="background-color: rgba(0,0,0,0.5);
-                z-index: 999;display:{% if show_modal %}block{% else %}none{% endif %}">
-    <form class="modal-content" id="myForm" style="max-width: 40rem" method="post" action="{% url 'account_login' %}">
-    </form>
-  </div>
-  <div class="signup-frame">
-    <div class="signup-frame__img">
-      <img src="{% static 'assets/logos/Green-H2Islands-Full-Logo.png' %}"
-                 alt="GreenH2Islands logo">
-    </div>
-    <form method="post" class="signup-frame__form">
+    <form
+      id="login-form"
+      method="post"
+      action="{% url 'account_login' %}"
+    >
       {% csrf_token %}
       {{ form|crispy }}
-      <button class="btn btn--large" type="submit"
-              id="loginbutton">{% translate "Login" %}</button>
-    </form>
-    <!--div style="text-align: left;">
-        <input type="checkbox" class="form-check-input" id="isEnabled"/>
-        <label for="isEnabled" style="margin-left: 5px;"><span>Remember me</span></label>
-    </div-->
-    <div class="signup-frame__subheading">
-      {% translate "You do not have an account yet?" %} <a
-      href="{% url 'account_signup' %}">{% translate "Sign up" %}</a> or
-    </div>
-    <!--button onclick="document.getElementById('login').style.display='none'" type="button" class="cancelbtn">
-        Close
-    </button>
-    <p id="responseMsg"></p-->
-  </div>
-</main>
-{% endblock index %}
 
-{% block end_body_scripts %}
-<script src="{% static 'js/backend_communication.js' %}"></script>
-{% endblock end_body_scripts %}
+      {% if redirect_field_value %}
+        <input
+          type="hidden"
+          name="{{ redirect_field_name }}"
+          value="{{ redirect_field_value }}"
+        >
+      {% endif %}
+
+      <div class="mt-6 flex justify-center">
+        {% include "partials/buttons.html#btn-submit" with id="login-button" label="Log in" form_id="login-form" class="wizard-btn" %}
+      </div>
+    </form>
+
+    <p class="mt-6 text-center">
+      {% translate "You do not have an account yet?" %}
+      <a
+        href="{% url 'account_signup' %}"
+        class="font-medium text-brand-700 hover:underline"
+      >
+        {% translate "Sign up" %}
+      </a>
+    </p>
+  </section>
+{% endblock content %}
