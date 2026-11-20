@@ -3,20 +3,16 @@ import logging
 from django.shortcuts import *
 from django.http import HttpResponseRedirect
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 
 from .forms import *
 
 logger = logging.getLogger(__name__)
 
 
-@login_required
 def projects_list(request, proj_id=None):
     combined_projects_list = (
-        # Project.objects.filter(Q(user=request.user) | Q(viewers__user__email=request.user.email))
-        Project.objects
+        Project.objects.filter(user=request.user)
         # .distinct()
         .order_by("date_created")
         .reverse()
@@ -48,13 +44,13 @@ def projects_list(request, proj_id=None):
 
 
 def project_create(request):
-    project = Project.objects.create()
+    project = Project.objects.create(user=request.user)
 
     return HttpResponseRedirect(reverse("steps:project_information", args=[project.id]))
 
 
 def project_duplicate(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
 
     # user handling?
 
@@ -67,7 +63,7 @@ def project_duplicate(request, proj_id):
 
 
 def project_delete(request, proj_id):
-    project = get_object_or_404(Project, id=proj_id)
+    project = get_object_or_404(Project, id=proj_id, user=request.user)
 
     # if project.user != request.user:
     #     raise PermissionDenied
