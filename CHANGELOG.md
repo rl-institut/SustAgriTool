@@ -4,6 +4,20 @@
 
 ### Added
 
+- Improve login procedure [#75](https://github.com/rl-institut/SustAgriTool/pull/75)
+- Create new templates for: signup, login, account overview, change/reset password, edit email, edit username, delete account
+- Make project user aware and ensure proper login requirements
+
+### Changed
+
+### Fixed
+
+### Removed
+
+## [Unreleased]
+
+### Added
+
 - Retrieve weather data from weather data server [#76](https://github.com/rl-institut/SustAgriTool/pull/76)
 - Create Timeseries model
 - Create view and template to visualize weather data
