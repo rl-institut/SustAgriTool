@@ -1,4 +1,5 @@
 {
   "schemaVersion": 2,
-  "dockerfilePath": "compose/production/django/Dockerfile"
+  "dockerfilePath": "compose/production/django/Dockerfile",
+  "defaultDockerBuildVersion": "1"
 }
