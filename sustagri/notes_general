@@ -6,6 +6,12 @@ command order ambiguous, good practice:
 layout → spacing → sizing → typography → colors → borders → states
 
 
+### ------ new PYTHON insights -------- ###
+
+one-element tuples need trailing commas:
+(SURVEY_STRUCTURE,)
+
+
 ### ------ DJANGO design philosophies ------ ###
 
 https://docs.djangoproject.com/en/6.1/misc/design-philosophies/
@@ -55,3 +61,4 @@ ARIA = Accessible Rich Internet Application
 
 Where should they be stored?
 Which do we truly need and which are leftovers?
+
