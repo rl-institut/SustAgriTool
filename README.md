@@ -9,6 +9,21 @@ License: MIT
 
 ## Settings
 
+You need a .env file at the root of the repository
+
+```
+POSTGRES_HOST=localhost
+POSTGRES_PORT=<pg_port>
+POSTGRES_DB=<your_db>
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=<your_pw>>
+USE_DOCKER=False
+MAPBOX_ACCESS_TOKEN=<token>
+WEATHER_DATA_API_HOST=<api_url>
+```
+
+Simply type 
+
 Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getting-started/settings.html).
 
 ## Basic Commands
