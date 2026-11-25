@@ -26,6 +26,16 @@
 }
 
 @layer components {
+    /* --- messages --- */
+    .message.warning {
+        @apply border-amber-200 bg-amber-50 text-amber-800;
+    }
+
+    .message.error {
+        @apply border-red-200 bg-red-50 text-red-800;
+    }
+
+    /* --- buttons --- */
     .wizard-btn {
         @apply inline-flex min-w-28 items-center justify-center rounded-md bg-brand-700 px-6 py-2.5 text-base font-medium text-white hover:bg-brand-800 cursor-pointer;
     }
@@ -141,7 +151,7 @@
     gap: 0.5rem;
 }
 
-
+/* --- do not open dropdown menu when page is loaded --- */
 [x-cloak] {
     display: none !important;
 }

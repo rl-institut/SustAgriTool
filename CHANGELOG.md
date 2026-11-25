@@ -4,6 +4,23 @@
 
 ### Added
 
+- Improve messages template [#92](https://github.com/rl-institut/SustAgriTool/pull/92)
+
+### Changed
+
+- messages.html
+- base.html
+
+### Fixed
+
+### Removed
+
+- unused bootstrap.js, project.js, project.css, main.css
+
+## [Unreleased]
+
+### Added
+
 - Improve login procedure [#75](https://github.com/rl-institut/SustAgriTool/pull/75)
 - Create new templates for: signup, login, account overview, change/reset password, edit email, edit username, delete account
 - Make project user aware and ensure proper login requirements

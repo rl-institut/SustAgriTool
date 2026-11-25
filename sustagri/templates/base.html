@@ -25,10 +25,11 @@
           href="{% static 'assets/favicon/favicon.ico' %}" />
     <!-- manifest: again used to put webapp on homescreen as pseudo app, verify manifest file -->
     <link rel="manifest" href="{% static 'assets/favicon/site.webmanifest' %}" />
-    <!-- overarching style, adapt content later -->
+    <!-- overarching style for some browsers, adapt content later -->
     <meta name="theme-color" content="#ffffff" />
-    <script defer src="{% static 'js/third_party/alpine.min.js' %}"></script>
 
+    <!-- use CDN instead of static file? -->
+    <script defer src="{% static 'js/third_party/alpine.min.js' %}"></script>
 
     <title>
       {% block title %}
@@ -43,11 +44,9 @@
   </head>
 
   <body>
-    {{ redirect_to_login_immediately }}
-    <!-- jQuery: potentially remove it later -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    {% block start_body_scripts %}{% endblock %}
+    {% block start_body_scripts %}
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    {% endblock %}
 
     {% block navbar %}
       {% include "navbar.html" with user=user %}
@@ -55,15 +54,8 @@
 
     {% block topology %}{% endblock topology %}
     {% block index %}{% endblock index %}
-    <!-- modal to show debug messages, bootstrap, adapt to alpine or HTMX -->
-    <div class="modal fade"
-         id="messagesModal"
-         tabindex="-1"
-         role="dialog"
-         aria-labelledby="messagesModalLabel"
-         aria-hidden="true">
-      <div class="modal-dialog" role="document">{% include 'messages.html' %}</div>
-    </div>
+
+    {% include "messages.html" %}
 
     <main class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
     {% block content %}{% endblock content %}
@@ -95,20 +87,7 @@
       </footer>
     {% endblock footer %}
 
-    <!-- bootstrap will be removed -->
-    <script src="{% static 'js/third_party/bootstrap.bundle.min.js' %}"></script>
-
     {% block end_body_scripts %}{% endblock %}
 
-    <!-- javascript, check what it does -->
-    <script src="{% static 'js/project.js' %}"></script>
-    {% if messages %}
-      <script>
-        $(document).ready(function() {
-          var messagesModal = new bootstrap.Modal(document.getElementById('messagesModal'))
-          messagesModal.show();
-        });
-      </script>
-    {% endif %}
   </body>
 </html>
