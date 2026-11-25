@@ -55,15 +55,8 @@
 
     {% block topology %}{% endblock topology %}
     {% block index %}{% endblock index %}
-    <!-- modal to show debug messages, bootstrap, adapt to alpine or HTMX -->
-    <div class="modal fade"
-         id="messagesModal"
-         tabindex="-1"
-         role="dialog"
-         aria-labelledby="messagesModalLabel"
-         aria-hidden="true">
-      <div class="modal-dialog" role="document">{% include 'messages.html' %}</div>
-    </div>
+
+    {% include "messages.html" %}
 
     <main class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
     {% block content %}{% endblock content %}
@@ -102,13 +95,6 @@
 
     <!-- javascript, check what it does -->
     <script src="{% static 'js/project.js' %}"></script>
-    {% if messages %}
-      <script>
-        $(document).ready(function() {
-          var messagesModal = new bootstrap.Modal(document.getElementById('messagesModal'))
-          messagesModal.show();
-        });
-      </script>
-    {% endif %}
+
   </body>
 </html>

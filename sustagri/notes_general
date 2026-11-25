@@ -6,6 +6,14 @@ command order ambiguous, good practice:
 layout → spacing → sizing → typography → colors → borders → states
 
 
+### ------ Alpine.js ----- #####
+
+Confirmation interface using
+    x-data
+    @submit.prevent="if (confirm('<your_message>')) $el.submit()"
+inside a <form>
+
+
 ### ------ new PYTHON insights -------- ###
 
 one-element tuples need trailing commas:
