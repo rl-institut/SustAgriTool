@@ -1,19 +1,27 @@
-<div class="modal-content">
-  <div class="modal-body">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert {{ message.tags }} alert-dismissible" role="alert">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
+{% load i18n %}
+
+{% if messages %}
+  <div class="mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="space-y-2">
+    {% for message in messages %}
+      <div
+          x-data="{ show: true }"
+          x-show="show"
+          class="message {{ message.tags }} flex items-center justify-between rounded-md border px-4 py-3"
+          role="alert"
+        >
+        <span>{{ message }}</span>
+
+        <button
+          type="button"
+          @click="show = false"
+          class="shrink-0"
+          aria-label="{% translate 'Close' %}"
+        >
+          &times;
+        </button>
+      </div>
+    {% endfor %}
+    </div>
   </div>
-  <div class="modal-footer">
-    <button type="button"
-              class="close"
-              data-bs-dismiss="modal"
-              aria-label="Close">
-        <span>&times;</span>
-      </button>
-  </div>
-</div>
+{% endif %}
