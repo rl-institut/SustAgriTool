@@ -14,4 +14,4 @@ echo UPDATE SURVEY
 echo UPDATETRANSLATIONS
 python /app/manage.py compilemessages
 
-exec gunicorn config.wsgi --bind 0.0.0.0:5000 --chdir=/app --workers=2 --timeout=120
+gunicorn config.wsgi:application --bind 0.0.0.0:5000 --chdir=/app --workers=4 --timeout=120
