@@ -5,3 +5,29 @@
 {% block title %}
   {% translate "Contact" %}
 {% endblock title %}
+
+{% block content %}
+<section class="mx-auto max-w-4xl">
+    <h1 class="mb-8 text-center">
+        {% translate "Contact" %}
+    </h1>
+
+    <div>
+				<h2>{% translate "Project Website" %}</h2>
+				{% blocktranslate with url_proj="https://reiner-lemoine-institut.de/en/project/sustagri-sustainable-agroforestry-systems-for-the-mediterranean/" %}
+        <p>You can visit the SustAgri <a href="{{url_proj}}" target="_blank" rel="noreferrer">website</a> to know more about the project, partners and funding</p>
+        {% endblocktranslate %}
+
+				<h2>{% translate "Feedback or question?" %}</h2>
+				{% blocktranslate %}
+        <p>You are invited to leave us a comment or feedback: sustagri@rl-institut.de</p>
+        {% endblocktranslate %}
+
+				<h2>Github</h2>
+				{% blocktranslate with url_github="https://github.com/rl-institut/SustAgriTool" %}
+				<p>You can follow the development of this user interface by visiting our <a href="{{url_github}}" target="_blank" rel="noreferrer">github page</a></p>
+				{% endblocktranslate %}
+		</div>
+
+</section>
+{% endblock content %}

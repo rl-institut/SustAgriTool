@@ -1,4 +1,21 @@
 # Changelog
+## [Unreleased]
+
+### Added
+
+- Basic info templates to meet legal requirements [#93](https://github.com/rl-institut/SustAgriTool/pull/93)
+
+### Changed
+
+- contact.html
+- imprint.html
+- license.html
+- LICENSE
+- privacy.html
+
+### Fixed
+
+### Removed
 
 ## [Unreleased]
 
