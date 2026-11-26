@@ -4,6 +4,8 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
+RUN npx @tailwindcss/cli -i ./tailwind/input.css -o ./static/css/output.css --minify
+
 echo COLLECTSTATIC
 python /app/manage.py collectstatic --noinput
 echo MIGRATE
