@@ -80,9 +80,13 @@ COPY --from=python-build-stage --chown=django:django ${APP_HOME} ${APP_HOME}
 # make django owner of the WORKDIR directory as well.
 RUN chown django:django ${APP_HOME}
 
+RUN npx @tailwindcss/cli -i ./sustagri/static/css/input.css -o ./sustagri/static/css/output.css --minify
+
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
 USER django
+
+
 
 CMD ${STARTUP_COMMAND}
