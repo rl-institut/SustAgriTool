@@ -84,6 +84,8 @@ RUN chown django:django ${APP_HOME}
 # find out how to install it
 #RUN npx @tailwindcss/cli -i ./sustagri/static/css/input.css -o ./sustagri/static/css/output.css --minify
 
+RUN rm ${APP_HOME}/sustagri/static/css/input.css
+
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
