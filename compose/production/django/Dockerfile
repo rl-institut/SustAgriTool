@@ -38,7 +38,6 @@ WORKDIR ${APP_HOME}
 RUN addgroup --system django \
   && adduser --system --ingroup django --home /home/django django
 
-
 # Install required system dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
   # psycopg dependencies
@@ -48,7 +47,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # entrypoint
   wait-for-it \
   #npx and nodejs
-  nodejs npm \
+ # nodejs npm \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
@@ -82,7 +81,8 @@ COPY --from=python-build-stage --chown=django:django ${APP_HOME} ${APP_HOME}
 # make django owner of the WORKDIR directory as well.
 RUN chown django:django ${APP_HOME}
 
-RUN npx @tailwindcss/cli -i ./sustagri/static/css/input.css -o ./sustagri/static/css/output.css --minify
+# find out how to install it
+#RUN npx @tailwindcss/cli -i ./sustagri/static/css/input.css -o ./sustagri/static/css/output.css --minify
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
