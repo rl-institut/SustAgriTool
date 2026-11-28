@@ -22,7 +22,7 @@ MAPBOX_ACCESS_TOKEN=<token>
 WEATHER_DATA_API_HOST=<api_url>
 ```
 
-Simply type 
+Simply type
 
 Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getting-started/settings.html).
 

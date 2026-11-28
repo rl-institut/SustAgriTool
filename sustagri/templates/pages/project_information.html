@@ -5,174 +5,166 @@
 
 {% block head_block %}
   <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 {% endblock head_block %}
-
 {% block start_body_scripts %}
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 {% endblock start_body_scripts %}
-
 {% block progression_content %}
-    <!-- This section may become a partial to be included on all pages -->
-    <section class="mb-8 hyphens-auto break-words">
-      {% blocktranslate %}
+  <!-- This section may become a partial to be included on all pages -->
+  <section class="mb-8 hyphens-auto break-words">
+    {% blocktranslate %}
         Perhaps you would like some information about this page and how to fill the form?
         I am just writing a little bit more meaningless nonsense to check how long paragraphs
         annnnnndddd hyphenation look like...
       {% endblocktranslate %}
-    </section>
+  </section>
+  <div x-data="locationPicker()">
+    <section class="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch">
+      <div>
+        <form method="post" id="project-information-form">
+          {% csrf_token %}
+          {{ form | crispy }}
+        </form>
+      </div>
+      <div class="min-h-[500px]">
+        <div id="mapid" class="h-full w-full rounded-lg"></div>
+        <script>
+          function locationPicker() {
+            return {
+              latitude: null,
+              longitude: null,
+              altitude: null,
 
-    <div x-data="locationPicker()">
-      <section class="grid grid-cols-1 gap-6 md:grid-cols-2 md:items-stretch">
-        <div>
-          <form method="post" id="project-information-form">
-              {% csrf_token %}
-              {{ form | crispy }}
-          </form>
-        </div>
+              map: null,
+              marker: null,
+              syncTimeout: null,
 
+              init() {
+                // Read existing Django form values before initializing the map.
+                const latInput = document.getElementById("id_latitude");
+                const lonInput = document.getElementById("id_longitude");
+                const altInput = document.getElementById("id_altitude");
 
-        <div class="min-h-[500px]">
-          <div id="mapid" class="h-full w-full rounded-lg"></div>
-          <script>
-              function locationPicker() {
-                  return {
-                      latitude: null,
-                      longitude: null,
-                      altitude: null,
+                if (latInput.value !== "") {
+                  this.latitude = Number(latInput.value);
+                }
 
-                      map: null,
-                      marker: null,
-                      syncTimeout: null,
+                if (lonInput.value !== "") {
+                  this.longitude = Number(lonInput.value);
+                }
 
-                      init() {
-                          // Read existing Django form values before initializing the map.
-                          const latInput = document.getElementById("id_latitude");
-                          const lonInput = document.getElementById("id_longitude");
-                          const altInput = document.getElementById("id_altitude");
+                if (altInput && altInput.value !== "") {
+                  this.altitude = Number(altInput.value);
+                }
 
-                          if (latInput.value !== "") {
-                              this.latitude = Number(latInput.value);
-                          }
+                // Default map view: Centre of the mediterranian
+                let center = [35, 18];
+                let zoom = 4;
 
-                          if (lonInput.value !== "") {
-                              this.longitude = Number(lonInput.value);
-                          }
+                // Use stored coordinates when available
+                if (this.hasValidCoordinates()) {
+                  center = [this.latitude, this.longitude];
+                  zoom = 10;
+                }
 
-                          if (altInput && altInput.value !== "") {
-                              this.altitude = Number(altInput.value);
-                          }
+                this.map = L.map("mapid").setView(center, zoom);
 
-                          // Default map view: Centre of the mediterranian
-                          let center = [35, 18];
-                          let zoom = 4;
+                L.tileLayer(
+                  "https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/512/{z}/{x}/{y}?access_token={{ MAPBOX_ACCESS_TOKEN }}", {
+                    tileSize: 512,
+                    zoomOffset: -1,
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors &copy; Mapbox'
+                  }
+                ).addTo(this.map);
 
-                          // Use stored coordinates when available
-                          if (this.hasValidCoordinates()) {
-                              center = [this.latitude, this.longitude];
-                              zoom = 10;
-                          }
+                // Existing project: show its marker immediately.
+                if (this.hasValidCoordinates()) {
+                  this.setMarker();
+                }
 
-                          this.map = L.map("mapid").setView(center, zoom);
+                // Map → form
+                this.map.on("click", (event) => {
+                  this.latitude = Number(event.latlng.lat.toFixed(6));
+                  this.longitude = Number(event.latlng.lng.toFixed(6));
 
-                          L.tileLayer(
-                              "https://api.mapbox.com/styles/v1/mapbox/streets-v12/tiles/512/{z}/{x}/{y}?access_token={{ MAPBOX_ACCESS_TOKEN }}",
-                              {
-                                  tileSize: 512,
-                                  zoomOffset: -1,
-                                  maxZoom: 19,
-                                  attribution: '&copy; OpenStreetMap contributors &copy; Mapbox'
-                              }
-                          ).addTo(this.map);
+                  this.setMarker();
+                  this.updateAltitude();
+                });
 
-                          // Existing project: show its marker immediately.
-                          if (this.hasValidCoordinates()) {
-                              this.setMarker();
-                          }
+                // Form → map
+                this.$watch("latitude", () => this.scheduleCoordinateUpdate());
+                this.$watch("longitude", () => this.scheduleCoordinateUpdate());
+              },
 
-                          // Map → form
-                          this.map.on("click", (event) => {
-                              this.latitude = Number(event.latlng.lat.toFixed(6));
-                              this.longitude = Number(event.latlng.lng.toFixed(6));
+              hasValidCoordinates() {
+                return (
+                  Number.isFinite(this.latitude) &&
+                  Number.isFinite(this.longitude) &&
+                  this.latitude >= -90 &&
+                  this.latitude <= 90 &&
+                  this.longitude >= -180 &&
+                  this.longitude <= 180
+                );
+              },
 
-                              this.setMarker();
-                              this.updateAltitude();
-                          });
+              setMarker() {
+                if (!this.hasValidCoordinates()) {
+                  return;
+                }
 
-                          // Form → map
-                          this.$watch("latitude", () => this.scheduleCoordinateUpdate());
-                          this.$watch("longitude", () => this.scheduleCoordinateUpdate());
-                      },
+                const position = [this.latitude, this.longitude];
 
-                      hasValidCoordinates() {
-                          return (
-                              Number.isFinite(this.latitude) &&
-                              Number.isFinite(this.longitude) &&
-                              this.latitude >= -90 &&
-                              this.latitude <= 90 &&
-                              this.longitude >= -180 &&
-                              this.longitude <= 180
-                          );
-                      },
+                if (this.marker) {
+                  this.marker.setLatLng(position);
+                } else {
+                  this.marker = L.marker(position).addTo(this.map);
+                }
+              },
 
-                      setMarker() {
-                          if (!this.hasValidCoordinates()) {
-                              return;
-                          }
+              scheduleCoordinateUpdate() {
+                clearTimeout(this.syncTimeout);
 
-                          const position = [this.latitude, this.longitude];
+                this.syncTimeout = setTimeout(() => {
+                  if (!this.hasValidCoordinates()) {
+                    return;
+                  }
 
-                          if (this.marker) {
-                              this.marker.setLatLng(position);
-                          } else {
-                              this.marker = L.marker(position).addTo(this.map);
-                          }
-                      },
+                  this.setMarker();
+                  this.map.panTo([this.latitude, this.longitude]);
+                  this.updateAltitude();
+                }, 400);
+              },
 
-                      scheduleCoordinateUpdate() {
-                          clearTimeout(this.syncTimeout);
+              async updateAltitude() {
+                if (!this.hasValidCoordinates()) {
+                  return;
+                }
 
-                          this.syncTimeout = setTimeout(() => {
-                              if (!this.hasValidCoordinates()) {
-                                  return;
-                              }
+                try {
+                  const response = await fetch(
+                    `https://api.open-meteo.com/v1/elevation?latitude=${this.latitude}&longitude=${this.longitude}`
+                  );
 
-                              this.setMarker();
-                              this.map.panTo([this.latitude, this.longitude]);
-                              this.updateAltitude();
-                          }, 400);
-                      },
+                  if (!response.ok) {
+                    throw new Error("Elevation request failed");
+                  }
 
-                      async updateAltitude() {
-                          if (!this.hasValidCoordinates()) {
-                              return;
-                          }
+                  const data = await response.json();
 
-                          try {
-                              const response = await fetch(
-                                  `https://api.open-meteo.com/v1/elevation?latitude=${this.latitude}&longitude=${this.longitude}`
-                              );
-
-                              if (!response.ok) {
-                                  throw new Error("Elevation request failed");
-                              }
-
-                              const data = await response.json();
-
-                              this.altitude = data.elevation[0];
-                          } catch (error) {
-                              console.error("Could not retrieve elevation:", error);
-                          }
-                      }
-                  };
+                  this.altitude = data.elevation[0];
+                } catch (error) {
+                  console.error("Could not retrieve elevation:", error);
+                }
               }
-          </script>
-        </div>
-      </section>
-    </div>
+            };
+          }
+        </script>
+      </div>
+    </section>
+  </div>
 {% endblock progression_content %}
-
 {% block next_btn %}
-    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" class="wizard-btn" %}
+  {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="project-information-form" class="wizard-btn" %}
 {% endblock next_btn %}

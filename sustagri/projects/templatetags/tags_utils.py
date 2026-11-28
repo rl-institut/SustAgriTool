@@ -1,8 +1,4 @@
-from math import floor
-from django.utils.safestring import mark_safe
-
 from django import template
-from django.db.models import Q
 
 register = template.Library()
 
@@ -19,16 +15,7 @@ def setvar(val=None):
 
 @register.filter
 def getval(val):
-    # import pdb;pdb.set_trace()
     return str(val)
-
-
-@register.filter
-def pdb(element):
-    import pdb
-
-    pdb.set_trace()
-    return element
 
 
 @register.filter
@@ -93,14 +80,4 @@ def is_matrix_source(field):
     if field_classes is not None:
         if "matrix_source" in field_classes:
             answer = True
-    return answer
-
-
-@register.filter
-def is_water_header(field_label):
-    answer = None
-    if "Which water source do you use for drinking water" in field_label:
-        answer = "Drinking water"
-    elif "Which water source do you use for service water" in field_label:
-        answer = "Service water"
     return answer

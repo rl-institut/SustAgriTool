@@ -1,123 +1,70 @@
 {% extends "base.html" %}
+
 {% load i18n %}
 {% load tailwind_filters %}
 
 {% block title %}
-    {% translate "Email Addresses" %}
+  {% translate "Email Addresses" %}
 {% endblock title %}
-
 {% block content %}
-<section class="mx-auto max-w-2xl">
-    <h1 class="mb-6 text-center">
-        {% translate "Email Addresses" %}
-    </h1>
-
+  <section class="mx-auto max-w-2xl">
+    <h1 class="mb-6 text-center">{% translate "Email Addresses" %}</h1>
     {% if emailaddresses %}
-        <p class="mb-4 text-sm text-neutral-600">
-            {% translate "The following email addresses are associated with your account:" %}
-        </p>
-
-        <form
-            method="post"
-            action="{% url 'account_email' %}"
-            class="space-y-4"
-        >
-            {% csrf_token %}
-
-            <div class="space-y-2">
-                {% for radio in emailaddress_radios %}
-                    {% with emailaddress=radio.emailaddress %}
-                        <label
-                            for="{{ radio.id }}"
-                            class="flex cursor-pointer items-center gap-3 rounded-md border border-neutral-200 p-3"
-                        >
-                            <input
-                                id="{{ radio.id }}"
-                                type="radio"
-                                name="email"
-                                value="{{ emailaddress.email }}"
-                                {% if radio.checked %}checked{% endif %}
-                            >
-
-                            <span class="flex-1">
-                                {{ emailaddress.email }}
-                            </span>
-
-                            {% if emailaddress.verified %}
-                                <span class="text-sm text-green-700">
-                                    {% translate "Verified" %}
-                                </span>
-                            {% else %}
-                                <span class="text-sm text-amber-700">
-                                    {% translate "Unverified" %}
-                                </span>
-                            {% endif %}
-
-                            {% if emailaddress.primary %}
-                                <span class="text-sm font-medium">
-                                    {% translate "Primary" %}
-                                </span>
-                            {% endif %}
-                        </label>
-                    {% endwith %}
-                {% endfor %}
-            </div>
-
-            <div class="flex flex-wrap gap-3">
-                <button
-                    type="submit"
-                    name="action_primary"
-                    class="wizard-btn"
-                >
-                    {% translate "Make Primary" %}
-                </button>
-
-                <button
-                    type="submit"
-                    name="action_send"
-                    class="wizard-btn"
-                >
-                    {% translate "Re-send Verification" %}
-                </button>
-
-                <button
-                    type="submit"
-                    name="action_remove"
-                    class="rounded-md px-3 py-2 font-medium text-red-600 hover:bg-red-50"
-                    x-data
-                    @click="if (!confirm('Are you sure you want to remove this email address?')) $event.preventDefault()"
-                >
-                    {% translate "Remove" %}
-                </button>
-            </div>
-        </form>
-    {% endif %}
-
-
-    {% if can_add_email %}
-        <div class="mt-10 border-t border-neutral-200 pt-6">
-            <h2 class="mb-4">
-                {% translate "Add Email Address" %}
-            </h2>
-
-            <form
-                id="add-email-form"
-                method="post"
-                action="{% url 'account_email' %}"
-            >
-                {% csrf_token %}
-
-                {{ form|crispy }}
-
-                <div class="mt-6">
-                    {% include "partials/buttons.html#btn-submit" with id="add-email-button" label="Add Email" form_id="add-email-form" class="wizard-btn" name="action_add" %}
-                </div>
-            </form>
+      <p class="mb-4 text-sm text-neutral-600">
+        {% translate "The following email addresses are associated with your account:" %}
+      </p>
+      <form method="post" action="{% url 'account_email' %}" class="space-y-4">
+        {% csrf_token %}
+        <div class="space-y-2">
+          {% for radio in emailaddress_radios %}
+            {% with emailaddress=radio.emailaddress %}
+              <label for="{{ radio.id }}"
+                     class="flex cursor-pointer items-center gap-3 rounded-md border border-neutral-200 p-3">
+                <input id="{{ radio.id }}"
+                       type="radio"
+                       name="email"
+                       value="{{ emailaddress.email }}"
+                       {% if radio.checked %}checked{% endif %} />
+                <span class="flex-1">{{ emailaddress.email }}</span>
+                {% if emailaddress.verified %}
+                  <span class="text-sm text-green-700">{% translate "Verified" %}</span>
+                {% else %}
+                  <span class="text-sm text-amber-700">{% translate "Unverified" %}</span>
+                {% endif %}
+                {% if emailaddress.primary %}
+                  <span class="text-sm font-medium">{% translate "Primary" %}</span>
+                {% endif %}
+              </label>
+            {% endwith %}
+          {% endfor %}
         </div>
+        <div class="flex flex-wrap gap-3">
+          <button type="submit" name="action_primary" class="wizard-btn">{% translate "Make Primary" %}</button>
+          <button type="submit" name="action_send" class="wizard-btn">{% translate "Re-send Verification" %}</button>
+          <button type="submit"
+                  name="action_remove"
+                  class="rounded-md px-3 py-2 font-medium text-red-600 hover:bg-red-50"
+                  x-data
+                  @click="if (!confirm('Are you sure you want to remove this email address?')) $event.preventDefault()">
+            {% translate "Remove" %}
+          </button>
+        </div>
+      </form>
     {% endif %}
-
+    {% if can_add_email %}
+      <div class="mt-10 border-t border-neutral-200 pt-6">
+        <h2 class="mb-4">{% translate "Add Email Address" %}</h2>
+        <form id="add-email-form" method="post" action="{% url 'account_email' %}">
+          {% csrf_token %}
+          {{ form|crispy }}
+          <div class="mt-6">
+            {% include "partials/buttons.html#btn-submit" with id="add-email-button" label="Add Email" form_id="add-email-form" class="wizard-btn" name="action_add" %}
+          </div>
+        </form>
+      </div>
+    {% endif %}
     <div class="mt-4 text-center">
-    {% include "partials/buttons.html#btn-link" with label="Back to account" href=user.get_absolute_url class="text-link" %}
+      {% include "partials/buttons.html#btn-link" with label="Back to account" href=user.get_absolute_url class="text-link" %}
     </div>
-</section>
+  </section>
 {% endblock content %}

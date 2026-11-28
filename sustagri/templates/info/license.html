@@ -5,17 +5,13 @@
 {% block title %}
   {% translate "License" %}
 {% endblock title %}
-
 {% block content %}
-<section class="mx-auto max-w-4xl">
-    <h1 class="mb-8 text-center">
-        {% translate "License" %}
-    </h1>
-
+  <section class="mx-auto max-w-4xl">
+    <h1 class="mb-8 text-center">{% translate "License" %}</h1>
     <div class="space-y-6">
       {% blocktranslate with url_gui="https://github.com/rl-institut/SustAgriTool" url_license="https://github.com/rl-institut/SustAgriTool/blob/main/LICENSE" %}
       <p>The source code of this <a href="{{url_gui}}" target="_blank" rel="noreferrer">user interface</a> is licensed under <a href="{{url_license}}" target="_blank" rel="noreferrer">MIT license</a></p>
       {% endblocktranslate %}
     </div>
-</section>
+  </section>
 {% endblock content %}

@@ -14,8 +14,9 @@ def getfield(value, arg):
     if hasattr(value, "fields"):
         fields = value.fields
         if str(arg) in fields:
-            field = str(fields[str(arg)])
-            return field
+            return str(fields[str(arg)])
+
+    return None
 
 
 @register.filter

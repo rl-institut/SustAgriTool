@@ -4,11 +4,9 @@
 
 <!DOCTYPE html>
 <html lang="de">
-
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- icon for website as iOS home screen pseudo app, verify rel and href -->
     <link rel="apple-touch-icon"
           sizes="180x180"
@@ -27,43 +25,35 @@
     <link rel="manifest" href="{% static 'assets/favicon/site.webmanifest' %}" />
     <!-- overarching style for some browsers, adapt content later -->
     <meta name="theme-color" content="#ffffff" />
-
     <!-- use CDN instead of static file? -->
     <script defer src="{% static 'js/third_party/alpine.min.js' %}"></script>
-
     <title>
       {% block title %}
         SustAgri
       {% endblock title %}
     </title>
-
     <link rel="stylesheet" href="{% static 'css/output.css' %}" />
-
     {% block head_block %}
     {% endblock head_block %}
   </head>
-
   <body>
     {% block start_body_scripts %}
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     {% endblock %}
-
     {% block navbar %}
       {% include "navbar.html" with user=user %}
     {% endblock navbar %}
-
-    {% block topology %}{% endblock topology %}
-    {% block index %}{% endblock index %}
-
+    {% block topology %}
+    {% endblock topology %}
+    {% block index %}
+    {% endblock index %}
     {% include "messages.html" %}
-
     <main class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
-    {% block content %}{% endblock content %}
+      {% block content %}
+      {% endblock content %}
     </main>
-
     {% block footer %}
       <footer class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-
         <a href="{% url 'projects:home' %}">
           <img src="{% static 'assets/logos/SustAgriTool.svg' %}"
                alt="SustAgriTool Logo" />
@@ -72,22 +62,16 @@
           <ul>
             {% url 'contact' as link %}
             {% include "partials/buttons.html#btn-link" with id="contact-button" label="Contact" href=link class="navbar-btn" %}
-
             {% url 'license' as link %}
             {% include "partials/buttons.html#btn-link" with id="license-button" label="License" href=link class="navbar-btn" %}
-
             {% url 'imprint' as link %}
             {% include "partials/buttons.html#btn-link" with id="imprint-button" label="Imprint" href=link class="navbar-btn" %}
-
             {% url 'privacy' as link %}
             {% include "partials/buttons.html#btn-link" with id="privacy-button" label="Privacy" href=link class="navbar-btn" %}
           </ul>
         </div>
-
       </footer>
     {% endblock footer %}
-
     {% block end_body_scripts %}{% endblock %}
-
   </body>
 </html>

@@ -1,13 +1,27 @@
-from django.shortcuts import render, get_object_or_404
+import json
+import logging
+from pathlib import Path
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.http import require_http_methods
 
-from sustagri.projects.forms import *
-from sustagri.steps.helpers import *
-from sustagri.steps.survey import *
+from config.settings.base import MAPBOX_ACCESS_TOKEN
+from sustagri.projects.forms import ProjectForm
+from sustagri.projects.forms import SurveyQuestionForm
+from sustagri.projects.forms import is_matrix_source
+from sustagri.projects.models import Project
+from sustagri.projects.models import SurveyAnswer
+from sustagri.projects.models import SurveyQuestion
+from sustagri.steps.helpers import get_weather_data
+from sustagri.steps.survey import SURVEY_CATEGORIES
+from sustagri.steps.survey import SURVEY_QUESTIONS_CATEGORIES
+from sustagri.steps.survey import SURVEY_STRUCTURE
+from sustagri.steps.survey import get_survey_question_by_id
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +49,7 @@ def project_information(request, proj_id):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(
-                reverse("steps:ogp_steps", args=[proj_id, step_id + 1])
+                reverse("steps:ogp_steps", args=[proj_id, step_id + 1]),
             )
     else:
         form = ProjectForm(instance=project)
@@ -50,7 +64,7 @@ def project_information(request, proj_id):
             "page_information": step_info,
             "step_list": step_list,
             "form": form,
-            "MAPBOX_ACCESS_TOKEN": settings.MAPBOX_ACCESS_TOKEN,
+            "MAPBOX_ACCESS_TOKEN": MAPBOX_ACCESS_TOKEN,
         },
     )
 
@@ -60,24 +74,19 @@ def site_conditions(request, proj_id):
     project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("site_conditions")
 
-    # TODO: user handling
-    # if (project.user != request.user) and (
-    #     project.viewers.filter(user__email=request.user.email, share_rights="edit").exists() is False
-    # ):
-    #     raise PermissionDenied
-
     context = {
-            "proj_id": proj_id,
-            "step_id": step_id,
-            "proj_name": project.name,
-            "page_information": step_info,
-            "step_list": step_list,
-        }
+        "proj_id": proj_id,
+        "step_id": step_id,
+        "proj_name": project.name,
+        "page_information": step_info,
+        "step_list": step_list,
+    }
 
-    if request.method == "GET":
+    if request.GET:
         timeseries = get_weather_data(proj_id, raw=False)
 
-        # TODO: Retrieve timestamps from weather data directly or make project itself time aware
+        # TODO: Retrieve timestamps from weather data directly
+        #   or make project itself time aware
         timestamps = None
 
         timeseries_labels = {
@@ -96,75 +105,80 @@ def site_conditions(request, proj_id):
                 "timeseries": json.dumps(timeseries),
                 "timeseries_keys": timeseries_labels,
                 "test": "test",
-            }
+            },
         )
 
         return render(request, "pages/site_conditions.html", context)
 
-    if request.method == "POST":
-        # TODO
-        return HttpResponseRedirect(reverse("steps:ogp_steps", args=[proj_id, step_id + 1]))
+    return HttpResponseRedirect(
+        reverse("steps:ogp_steps", args=[proj_id, step_id + 1]),
+    )
 
 
 @require_http_methods(["GET", "POST"])
-def survey(request, proj_id):
+def survey(request, proj_id):  # noqa: C901, PLR0912, PLR0915
     project = get_object_or_404(Project, id=proj_id, user=request.user)
     step_id, step_info = get_step_id_and_info("survey")
 
     if request.method == "POST":
-        form = SurveyQuestionForm(request.POST, qs=SurveyAnswer.objects.filter(project_id=proj_id))
+        form = SurveyQuestionForm(
+            request.POST,
+            qs=SurveyAnswer.objects.filter(project_id=proj_id),
+        )
 
         if form.is_valid():
             qs = SurveyAnswer.objects.filter(project_id=proj_id)
-            with open(f"project_{proj_id}_survey_answers.json", "w") as fp:
+            with Path.open(f"project_{proj_id}_survey_answers.json", "w") as fp:
                 json.dump(form.cleaned_data, fp, indent=4)
             for criteria_num, value in form.cleaned_data.items():
                 crit = qs.get(question_id=criteria_num.replace("criteria_", ""))
                 crit.value = json.dumps(value) if not isinstance(value, str) else value
                 crit.save(update_fields=["value"])
 
-            return HttpResponseRedirect(reverse("steps:ogp_steps", args=[proj_id, step_id + 1]))
-
-    else:
-        if proj_id is None:
-            last_project_id = (
-                SurveyAnswer.objects.all().values_list("proj_id", flat=True).distinct().order_by().last()
+            return HttpResponseRedirect(
+                reverse("steps:ogp_steps", args=[proj_id, step_id + 1]),
             )
-            if last_project_id is None:
-                last_project_id = 0
-            project_id = last_project_id + 1
-            return HttpResponseRedirect(reverse("view_survey", args=[project_id]))
-        else:
-            project_id = proj_id
 
-            # Check if answers already exists, if not create them
-            qs_answer = SurveyAnswer.objects.filter(project_id=project_id)
-            create_new_form = False
-            if qs_answer.exists():
-                try:
-                    form = SurveyQuestionForm(qs=qs_answer)
-                # Could be caused by outdated survey answers
-                except ObjectDoesNotExist:
-                    create_new_form = True
-                    pass
-            else:
-                create_new_form = True
+    elif proj_id is None:
+        last_project_id = (
+            SurveyAnswer.objects.all()
+            .values_list("proj_id", flat=True)
+            .distinct()
+            .order_by()
+            .last()
+        )
+        if last_project_id is None:
+            last_project_id = 0
+        project_id = last_project_id + 1
+        return HttpResponseRedirect(reverse("view_survey", args=[project_id]))
+    else:
+        project_id = proj_id
 
-            if create_new_form:
-                questions = SurveyQuestion.objects.all()
-                print(questions)
-                for question in questions:
-                    # print(question)
-                    answer_param = {}
-                    answer_param["project_id"] = project_id
-                    answer_param["question"] = question
-                    new_answer = SurveyAnswer(**answer_param)
-                    new_answer.save()
-                qs_answer = SurveyAnswer.objects.filter(project_id=project_id)
-
+        # Check if answers already exists, if not create them
+        qs_answer = SurveyAnswer.objects.filter(project_id=project_id)
+        create_new_form = False
+        if qs_answer.exists():
+            try:
                 form = SurveyQuestionForm(qs=qs_answer)
+            # Could be caused by outdated survey answers
+            except ObjectDoesNotExist:
+                create_new_form = True
+        else:
+            create_new_form = True
 
-    categories = [cat for cat in SURVEY_QUESTIONS_CATEGORIES.keys()]
+        if create_new_form:
+            questions = SurveyQuestion.objects.all()
+            for question in questions:
+                answer_param = {}
+                answer_param["project_id"] = project_id
+                answer_param["question"] = question
+                new_answer = SurveyAnswer(**answer_param)
+                new_answer.save()
+            qs_answer = SurveyAnswer.objects.filter(project_id=project_id)
+
+            form = SurveyQuestionForm(qs=qs_answer)
+
+    categories = list(SURVEY_QUESTIONS_CATEGORIES)
     categories_map = []
     matrix_headers = {}
     matrix_labels = {}
@@ -183,18 +197,16 @@ def survey(request, proj_id):
             for answer, subquestions in question["subquestion"].items():
                 labels.append(answer)
                 for sq_id in subquestions:
-                    q_main_id = ".".join(sq_id.split(".")[:2])
                     subquestion = get_survey_question_by_id(SURVEY_STRUCTURE, sq_id)
-                    # print(subquestion)
                     if subquestion.get("display_type", "") == "matrix":
                         if subquestion["question"] not in subs:
                             subs.append(subquestion["question"])
             matrix_headers[field] = subs
             matrix_labels[field] = labels
 
-
-    # Check which categories have field errors, so we can display them as open in the accordeon and the user can see the issue
-    faulty_fields = [k.replace("criteria_", "") for k in form.errors.keys()]
+    # Check which categories have field errors, so we can display
+    #   them as open in the accordeon and the user can see the issue
+    faulty_fields = [k.replace("criteria_", "") for k in form.errors]
     faulty_fields_cat = [SURVEY_CATEGORIES.get(q) for q in faulty_fields]
     faulty_fields_cat = set(faulty_fields_cat)
 
@@ -216,7 +228,6 @@ def survey(request, proj_id):
             "page_information": step_info,
         },
     )
-
 
 
 def agroforestry_practices(request, proj_id):
@@ -290,19 +301,18 @@ def example_case_studies(request, proj_id):
 def steps(request, proj_id, step_id=None):
     if step_id is None:
         return HttpResponseRedirect(
-            reverse("steps:ogp_steps", args=[proj_id, 1])
+            reverse("steps:ogp_steps", args=[proj_id, 1]),
         )
 
     return HttpResponseRedirect(
         reverse(
             f"steps:{list(STEPS.keys())[step_id - 1]}",
             args=[proj_id],
-        )
+        ),
     )
+
 
 def get_step_id_and_info(step_name):
     step_id = int(list(STEPS.keys()).index(step_name) + 1)
     step_info = str(STEPS[step_name])
     return step_id, step_info
-
-
