@@ -4,243 +4,199 @@
 {% load i18n %}
 {% load tags_utils %}
 
-
 {% block progression_content %}
-
-<section class="mx-auto max-w-7xl">
-	<p class="mb-4 text-sm text-neutral-700">
-		<b>Note:</b> This Note is directly in this survey template, maybe put it in the parent template (step_progression) or make it part of the context.
-	</p>
-
-	<form
-      id="surveyQuestions"
-      action="{% url 'steps:submit_survey' proj_id %}"
-      method="POST"
-      x-data="surveyQuestions"
-      @change="handleChange($event)"
-  >
-		{% csrf_token %}
-
-		<div class="space-y-3" id="accordionQuestions">
-			{% for cat in categories %}
-
-			<div
-				class="survey-accordion-item"
-				x-data="{ open: {% if forloop.first or cat in faulty_fields_cat %}true{% else %}false{% endif %} }"
-			>
-				<h3 id="heading-{{ forloop.counter }}">
-					<button
-						class="survey-accordion-button"
-						type="button"
-						@click="open = !open"
-						:aria-expanded="open"
-						aria-controls="collapse-{{ forloop.counter }}"
-					>
-						{{ categories_verbose|get_item:cat }}
-					</button>
-				</h3>
-
-				<div
-					id="collapse-{{ forloop.counter }}"
-					x-show="open"
-					x-cloak
-					aria-labelledby="heading-{{ forloop.counter }}"
-				>
-					<div class="cpn-business__questionnaire p-4">
-
-						{% setvar False as matrix_current %}
-
-						{% for field in form %}
-							{% if categories_map|get_index:forloop.counter0|is_current_category:cat %}
-
-								{% if field|is_matrix %}
-
-									{% comment %} here are the subquestion in matrix form {% endcomment %}
-									{{ field }}
-
-									{% for error in field.errors %}
-										<div>
-											<p class="font-bold text-red-600">{{ error }}</p>
-										</div>
-									{% endfor %}
-
-								{% else %}
-
-									<div class="form-group{% if field.errors %} invalid{% endif %}{% if field|is_subsubquestion %} subsubquestion{% endif %}{% if field|is_subquestion %} subquestion{% if field.initial %}{% else %} disabled {% endif %}{% endif %}">
-
-										{% if field.label|is_water_header %}
-											<h4>{{ field.label|is_water_header }}</h4>
-										{% endif %}
-
-										{{ field|as_crispy_field }}
-									</div>
-
-									{% if field|is_matrix_source %}
-										{% if matrix_current %}
-											This text should never be seen
-										{% else %}
-
-											{% comment %} here are begins the subquestion matrix container {% endcomment %}
-											{% setvar True as matrix_current %}
-
-											<div
-												id="id_matrix_{{ field.name }}"
-												class="form-group container_matrix{% if field.errors %} invalid{% endif %}{% if field|is_subsubquestion %} subsubquestion{% endif %}{% if field|is_subquestion %} subquestion{% if field.initial %}{% else %} disabled{% endif %}{% endif %}"
-											>
-												<span class="sub_question sub_sub_question matrix_target matrix_row_0 matrix_col_1"></span>
-
-												{% for header in matrix_labels|get_item:field.name %}
-													<span class="sub_question sub_sub_question matrix_target label_row_{{ forloop.counter }} matrix_row_{{ forloop.counter }} matrix_col_1">
-														{{ header }}
-													</span>
-												{% endfor %}
-
-												{% for header in matrix_headers|get_item:field.name %}
-													<div class="sub_question sub_sub_question matrix_target matrix_row_0 matrix_col_{{ forloop.counter|add:1 }}">
-														{{ header }}
-													</div>
-												{% endfor %}
-
-										{% endif %}
-									{% else %}
-										{% if matrix_current %}
-											{% setvar False as matrix_current %}
-											</div>
-										{% endif %}
-									{% endif %}
-
-								{% endif %}
-							{% endif %}
-						{% endfor %}
-
-					</div>
-				</div>
-			</div>
-
-			{% endfor %}
-
-		</div>
-	</form>
-</section>
+  <section class="mx-auto max-w-7xl">
+    <p class="mb-4 text-sm text-neutral-700">
+      <b>Note:</b> This Note is directly in this survey template, maybe put it in the parent template (step_progression) or make it part of the context.
+    </p>
+    <form id="surveyQuestions"
+          action="{% url 'steps:submit_survey' proj_id %}"
+          method="post"
+          x-data="surveyQuestions"
+          @change="handleChange($event)">
+      {% csrf_token %}
+      <div class="space-y-3" id="accordionQuestions">
+        {% for cat in categories %}
+          <div class="survey-accordion-item"
+               x-data="{ open: {% if forloop.first or cat in faulty_fields_cat %}true{% else %}false{% endif %} }">
+            <h3 id="heading-{{ forloop.counter }}">
+              <button class="survey-accordion-button"
+                      type="button"
+                      @click="open = !open"
+                      :aria-expanded="open"
+                      aria-controls="collapse-{{ forloop.counter }}">{{ categories_verbose|get_item:cat }}</button>
+            </h3>
+            <div id="collapse-{{ forloop.counter }}"
+                 x-show="open"
+                 x-cloak
+                 aria-labelledby="heading-{{ forloop.counter }}">
+              <div class="cpn-business__questionnaire p-4">
+                {% setvar False as matrix_current %}
+                {% for field in form %}
+                  {% if categories_map|get_index:forloop.counter0|is_current_category:cat %}
+                    {% if field|is_matrix %}
+                      {% comment %} here are the subquestion in matrix form {% endcomment %}
+                      {{ field }}
+                      {% for error in field.errors %}
+                        <div>
+                          <p class="font-bold text-red-600">{{ error }}</p>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="form-group{% if field.errors %} invalid{% endif %}{% if field|is_subsubquestion %} subsubquestion{% endif %}{% if field|is_subquestion %} subquestion{% if field.initial %}{% else %} disabled {% endif %}{% endif %}">
+                        {% if field.label|is_water_header %}
+                          <h4>{{ field.label|is_water_header }}</h4>
+                        {% endif %}
+                        {{ field|as_crispy_field }}
+                      </div>
+                      {% if field|is_matrix_source %}
+                        {% if matrix_current %}
+                          This text should never be seen
+                        {% else %}
+                          {% comment %} here are begins the subquestion matrix container {% endcomment %}
+                          {% setvar True as matrix_current %}
+                          <div id="id_matrix_{{ field.name }}" class="form-group container_matrix{% if field.errors %} invalid{% endif %}{% if field|is_subsubquestion %} subsubquestion{% endif %}{% if field|is_subquestion %} subquestion{% if field.initial %}{% else %} disabled{% endif %}{% endif %}">
+                            <span class="sub_question sub_sub_question matrix_target matrix_row_0 matrix_col_1"></span>
+                            {% for header in matrix_labels|get_item:field.name %}
+                              <span class="sub_question sub_sub_question matrix_target label_row_{{ forloop.counter }} matrix_row_{{ forloop.counter }} matrix_col_1">
+                                {{ header }}
+                              </span>
+                            {% endfor %}
+                            {% for header in matrix_headers|get_item:field.name %}
+                              <div class="sub_question sub_sub_question matrix_target matrix_row_0 matrix_col_{{ forloop.counter|add:1 }}">
+                                {{ header }}
+                              </div>
+                            {% endfor %}
+                        {% endif %}
+                      {% else %}
+                        {% if matrix_current %}
+                          {% setvar False as matrix_current %}
+                          </div>
+                      {% endif %}
+                    {% endif %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          </div>
+      {% endfor %}
+    </div>
+  </form>
+  </section>
 {% endblock progression_content %}
-
 {% block next_btn %}
-    {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="surveyQuestions" class="wizard-btn" %}
+  {% include "partials/buttons.html#btn-submit" with id="next-button" label="Next" form_id="surveyQuestions" class="wizard-btn" %}
 {% endblock next_btn %}
-
 {% block end_body_scripts %}
-<script>
-document.addEventListener("alpine:init", () => {
-    Alpine.data("surveyQuestions", () => ({
+  <script>
+    document.addEventListener("alpine:init", () => {
+      Alpine.data("surveyQuestions", () => ({
         init() {
-            this.$nextTick(() => {
-                this.$el
-                    .querySelectorAll("[data-subquestion-mapping]")
-                    .forEach(input => this.updateSubQuestions(input));
-                this.$el
-                    .querySelectorAll("[data-matrix-subquestion-mapping]")
-                    .forEach(input => this.updateMatrix(input));
-            });
+          this.$nextTick(() => {
+            this.$el
+              .querySelectorAll("[data-subquestion-mapping]")
+              .forEach(input => this.updateSubQuestions(input));
+            this.$el
+              .querySelectorAll("[data-matrix-subquestion-mapping]")
+              .forEach(input => this.updateMatrix(input));
+          });
         },
 
         handleChange(event) {
-            const input = event.target;
+          const input = event.target;
 
-            if (input.dataset.subquestionMapping) {
-                this.updateSubQuestions(input);
-            }
+          if (input.dataset.subquestionMapping) {
+            this.updateSubQuestions(input);
+          }
 
-            if (input.dataset.matrixSubquestionMapping) {
-                this.updateMatrix(input);
-            }
+          if (input.dataset.matrixSubquestionMapping) {
+            this.updateMatrix(input);
+          }
         },
 
         updateSubQuestions(input) {
-            const mapping = JSON.parse(input.dataset.subquestionMapping);
+          const mapping = JSON.parse(input.dataset.subquestionMapping);
 
-            const selectedValues = input.type === "checkbox"
-                ? [...this.$el.querySelectorAll(`input[name="${input.name}"]:checked`)]
-                    .map(el => el.value)
-                : [...input.selectedOptions].map(option => option.value);
+          const selectedValues = input.type === "checkbox" ? [...this.$el.querySelectorAll(`input[name="${input.name}"]:checked`)]
+            .map(el => el.value) : [...input.selectedOptions].map(option => option.value);
 
-            const visibleQuestions = selectedValues.flatMap(
-                value => mapping[value] ?? []
+          const visibleQuestions = selectedValues.flatMap(
+            value => mapping[value] ?? []
+          );
+
+          Object.values(mapping).flat().forEach(questionId => {
+            const field = document.getElementById(
+              `div_id_criteria_${questionId}`
             );
 
-            Object.values(mapping).flat().forEach(questionId => {
-                const field = document.getElementById(
-                    `div_id_criteria_${questionId}`
-                );
+            if (!field) return;
 
-                if (!field) return;
+            const wrapper = field.closest(".form-group");
 
-                const wrapper = field.closest(".form-group");
-
-                wrapper?.classList.toggle(
-                    "disabled",
-                    !visibleQuestions.includes(questionId)
-                );
-            });
+            wrapper?.classList.toggle(
+              "disabled",
+              !visibleQuestions.includes(questionId)
+            );
+          });
         },
 
         updateMatrix(input) {
-            const selectedValues = [
-                ...this.$el.querySelectorAll(
-                    `input[name="${input.name}"]:checked`
-                )
-            ].map(el => el.value.toLowerCase());
+          const selectedValues = [
+            ...this.$el.querySelectorAll(
+              `input[name="${input.name}"]:checked`
+            )
+          ].map(el => el.value.toLowerCase());
 
-            const container = document.getElementById(
-                `id_matrix_${input.name}`
-            );
+          const container = document.getElementById(
+            `id_matrix_${input.name}`
+          );
 
-            if (!container) return;
+          if (!container) return;
 
-            const visibleRows = [];
+          const visibleRows = [];
 
-            container.querySelectorAll(".matrix_col_1").forEach(label => {
-                const rowName = label.textContent.trim().toLowerCase();
-                const rowClass = [...label.classList]
-                    .find(cls => cls.startsWith("label_row_"));
+          container.querySelectorAll(".matrix_col_1").forEach(label => {
+            const rowName = label.textContent.trim().toLowerCase();
+            const rowClass = [...label.classList]
+              .find(cls => cls.startsWith("label_row_"));
 
-                if (selectedValues.includes(rowName)) {
-                    visibleRows.push(rowClass);
-                }
+            if (selectedValues.includes(rowName)) {
+              visibleRows.push(rowClass);
+            }
+          });
+
+          container.querySelectorAll(".matrix_target").forEach(el => {
+            if ([...el.classList].some(cls => cls.startsWith("label_row_"))) {
+              el.style.display = "none";
+              el.disabled = true;
+
+              [...el.classList]
+              .filter(cls => cls.startsWith("matrix_row_"))
+                .forEach(cls => el.classList.remove(cls));
+            }
+          });
+
+          visibleRows.forEach((rowClass, index) => {
+            const newClass = `matrix_row_${index + 1}`;
+
+            container.querySelectorAll(`.${rowClass}`).forEach(el => {
+              el.style.display = "";
+              el.disabled = false;
+              el.classList.add(newClass);
             });
+          });
 
-            container.querySelectorAll(".matrix_target").forEach(el => {
-                if ([...el.classList].some(cls => cls.startsWith("label_row_"))) {
-                    el.style.display = "none";
-                    el.disabled = true;
+          container.querySelectorAll(".matrix_row_0").forEach(el => {
+            el.style.display = visibleRows.length ? "" : "none";
+          });
 
-                    [...el.classList]
-                        .filter(cls => cls.startsWith("matrix_row_"))
-                        .forEach(cls => el.classList.remove(cls));
-                }
-            });
-
-            visibleRows.forEach((rowClass, index) => {
-                const newClass = `matrix_row_${index + 1}`;
-
-                container.querySelectorAll(`.${rowClass}`).forEach(el => {
-                    el.style.display = "";
-                    el.disabled = false;
-                    el.classList.add(newClass);
-                });
-            });
-
-            container.querySelectorAll(".matrix_row_0").forEach(el => {
-                el.style.display = visibleRows.length ? "" : "none";
-            });
-
-            container.classList.toggle(
-                "disabled",
-                visibleRows.length === 0
-            );
+          container.classList.toggle(
+            "disabled",
+            visibleRows.length === 0
+          );
         },
-    }));
-});
-</script>
+      }));
+    });
+  </script>
 {% endblock end_body_scripts %}
-
-

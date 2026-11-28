@@ -1,24 +1,11 @@
 {% load i18n %}
 
-
 {% partialdef btn-link %}
-  <a
-      id="{{ id }}"
-      href="{{ href }}"
-      class="{{ class }}"
-  >
-      {% translate label %}
-  </a>
+  <a id="{{ id }}" href="{{ href }}" class="{{ class }}">{% translate label %}</a>
 {% endpartialdef %}
-
-
 {% partialdef btn-submit %}
-  <button
-      id="{{ id }}"
-      type="submit"
-      {% if form_id %}form="{{ form_id }}"{% endif %}
-      class="{{ class }}"
-  >
-      {% translate label %}
-  </button>
+  <button id="{{ id }}"
+          type="submit"
+          {% if form_id %}form="{{ form_id }}"{% endif %}
+          class="{{ class }}">{% translate label %}</button>
 {% endpartialdef %}

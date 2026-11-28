@@ -1,32 +1,50 @@
 import json
+import logging
 
-from django.forms import *
+from django.forms import CharField
+from django.forms import CheckboxSelectMultiple
+from django.forms import ChoiceField
+from django.forms import FloatField
+from django.forms import Form
+from django.forms import ModelForm
+from django.forms import MultipleChoiceField
+from django.forms import NumberInput
+from django.forms import Textarea
 from django.utils.html import format_html
 
-from .models import *
-from sustagri.steps.survey import *
+from sustagri.steps.survey import SURVEY_STRUCTURE
+from sustagri.steps.survey import TYPE_STRING
+
+from .models import Project
+from .models import SurveyQuestion
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectForm(ModelForm):
     # CustomModelForm? check out offgridplanner
     class Meta:
         model = Project
-        exclude = [
-            "date_created",
-            "date_updated",
-            "user",
-            "options",
+        fields = [
+            "name",
+            "description",
+            "latitude",
+            "longitude",
+            "altitude",
         ]
         widgets = {
             "description": Textarea(attrs={"rows": 7}),
             "latitude": NumberInput(attrs={"x-model.number": "latitude"}),
             "longitude": NumberInput(attrs={"x-model.number": "longitude"}),
             "altitude": NumberInput(attrs={"x-model.number": "altitude"}),
-            }
+        }
         help_texts = {
-            "latitude": "Latitude coordinate of the project's location, in decimal degrees.",
-            "longitude": "Longitude coordinate of the project's location, in decimal degrees.",
-            "altitude": "Altitude of the project's location, in metres above sea level.",
+            "latitude": "Latitude coordinate "
+            "of the project's location, in decimal degrees.",
+            "longitude": "Longitude coordinate "
+            "of the project's location, in decimal degrees.",
+            "altitude": "Altitude of the project's "
+            "location, in metres above sea level.",
         }
 
     def __init__(self, *args, **kwargs):
@@ -52,7 +70,7 @@ def get_survey_question_by_id(survey_questions, question_id):
 
 
 class SurveyQuestionForm(Form):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # noqa: C901, PLR0912, PLR0915
         self.qs_answers = kwargs.pop("qs", [])
         super().__init__(*args, **kwargs)
         for q in SURVEY_STRUCTURE:
@@ -61,7 +79,8 @@ class SurveyQuestionForm(Form):
             label = answer.question.question
             if answer.question.description:
                 label = format_html(
-                    '{} <span class="icon icon-question cursor-help" title="{}"></span>',
+                    '{} <span class="icon icon-question cursor-help" title="{}">'
+                    "</span>",
                     label,
                     answer.question.description,
                 )
@@ -74,36 +93,47 @@ class SurveyQuestionForm(Form):
             if alv is not None:
                 try:
                     possible_answers = json.loads(alv)
-                    list_choices = [(pa, pa.replace("_", " ").capitalize()) for pa in possible_answers]
+                    list_choices = [
+                        (pa, pa.replace("_", " ").capitalize())
+                        for pa in possible_answers
+                    ]
 
                     if answer.question.multiple_answers is True:
                         opts["choices"] = list_choices
-                        opts["widget"] = CheckboxSelectMultiple(attrs={"class": "checkbox-grid"})
-                        self.fields[f"criteria_{answer.question.id}"] = MultipleChoiceField(**opts)
+                        opts["widget"] = CheckboxSelectMultiple(
+                            attrs={"class": "checkbox-grid"},
+                        )
+                        self.fields[f"criteria_{answer.question.id}"] = (
+                            MultipleChoiceField(**opts)
+                        )
                     else:
-                        opts["choices"] = [("", "----------")] + list_choices
-                        self.fields[f"criteria_{answer.question.id}"] = ChoiceField(**opts)
+                        opts["choices"] = [("", "----------"), *list_choices]
+                        self.fields[f"criteria_{answer.question.id}"] = ChoiceField(
+                            **opts,
+                        )
                 except json.decoder.JSONDecodeError:
                     self.fields[f"criteria_{answer.question.id}"] = FloatField(**opts)
+            elif answer.question.answer_type == TYPE_STRING:
+                self.fields[f"criteria_{answer.question.id}"] = CharField(**opts)
             else:
-                if answer.question.answer_type == TYPE_STRING:
-                    self.fields[f"criteria_{answer.question.id}"] = CharField(**opts)
-                else:
-                    self.fields[f"criteria_{answer.question.id}"] = FloatField(**opts)
+                self.fields[f"criteria_{answer.question.id}"] = FloatField(**opts)
             # treat sub question differently:
             # - links to onchange of supra question
             # - hide the sub question if the supra question's answer is not "Yes"
             if answer.question.subquestion_to is not None:
-
-                supra_question = SurveyQuestion.objects.get(question_id=answer.question.subquestion_to.question_id)
+                supra_question = SurveyQuestion.objects.get(
+                    question_id=answer.question.subquestion_to.question_id,
+                )
 
                 # subquestion class
-                self.fields[f"criteria_{answer.question.id}"].widget.attrs.update({"class": "sub_question"})
+                self.fields[f"criteria_{answer.question.id}"].widget.attrs.update(
+                    {"class": "sub_question"},
+                )
 
                 # subsubquestion class
                 if supra_question.subquestion_to is not None:
                     if answer.question.matrix_answers is True:
-                        # import pdb;pdb.set_trace()
+
                         def original_question_number(q_id):
                             answer = q_id
                             for letter in ("a", "b", "c", "d", "e"):
@@ -111,60 +141,74 @@ class SurveyQuestionForm(Form):
                                     answer = answer.replace(letter, "")
                             return answer
 
-                        matrix_idxs = original_question_number(answer.question.id).replace(
-                            f"{original_question_number(supra_question.id)}.", ""
+                        matrix_idxs = original_question_number(
+                            answer.question.id,
+                        ).replace(
+                            f"{original_question_number(supra_question.id)}.",
+                            "",
                         )
                         try:
                             matrix_col_idx, matrix_row_idx = matrix_idxs.split(".")
-                        except:
-                            print(supra_question.__dict__)
-                            print(matrix_idxs)
+                        except ValueError:
+                            logger.exception(
+                                "Invalid matrix index %r for survey question %r",
+                                matrix_idxs,
+                                supra_question.pk,
+                            )
 
-                        self.fields[f"criteria_{answer.question.id}"].widget.attrs.update(
+                        self.fields[
+                            f"criteria_{answer.question.id}"
+                        ].widget.attrs.update(
                             {
-                                "class": f"sub_question sub_sub_question matrix_target label_row_{int(matrix_row_idx)+1} matrix_row_{int(matrix_row_idx)+1} matrix_col_{int(matrix_col_idx)+1}"
-                            }
+                                "class": f"sub_question sub_sub_question matrix_target "
+                                f"label_row_{int(matrix_row_idx) + 1} "
+                                f"matrix_row_{int(matrix_row_idx) + 1} "
+                                f"matrix_col_{int(matrix_col_idx) + 1}",
+                            },
                         )
-                        # self.fields[f"criteria_{answer.question.id}"].widget.attrs.update({"class": f"sub_question sub_sub_question matrix_target matrix_col_{int(matrix_col_idx)+1}"})
-                        supra_question_css = self.fields[f"criteria_{supra_question.id}"].widget.attrs["class"]
+                        supra_question_css = self.fields[
+                            f"criteria_{supra_question.id}"
+                        ].widget.attrs["class"]
                         if "matrix_source" not in supra_question_css:
                             self.fields[f"criteria_{supra_question.id}"].widget.attrs[
                                 "class"
                             ] = f"{supra_question_css} matrix_source"
                     else:
-                        self.fields[f"criteria_{answer.question.id}"].widget.attrs.update(
-                            {"class": "sub_question sub_sub_question"}
+                        self.fields[
+                            f"criteria_{answer.question.id}"
+                        ].widget.attrs.update(
+                            {"class": "sub_question sub_sub_question"},
                         )
-                if is_matrix_source(self.fields[f"criteria_{supra_question.id}"]):
+                field = self.fields[f"criteria_{supra_question.id}"]
+                if is_matrix_source(field):
                     # here we know we are within matrix questions
-                    self.fields[f"criteria_{supra_question.id}"].widget.attrs.update(
-                        {
-                            "data-matrix-subquestion-mapping": supra_question.subquestion
-                        }
-                    )
+                    attr = {
+                        "data-matrix-subquestion-mapping": supra_question.subquestion
+                    }
                 else:
-                    self.fields[f"criteria_{supra_question.id}"].widget.attrs.update(
-                        {
-                            "data-subquestion-mapping": supra_question.subquestion
-                        }
-                    )
+                    attr = {"data-subquestion-mapping": supra_question.subquestion}
+                field.widget.attrs.update(attr)
 
-                # only provide initial value for subquestion if the answer to supraquestion exists and is valid
+                # only provide initial value for subquestion if
+                #   the answer to supraquestion exists and is valid
                 supra_answer = self.qs_answers.get(question=supra_question)
                 if supra_answer.value is not None:
                     if answer.value:
                         if answer.question.multiple_answers is True:
-                            self.fields[f"criteria_{answer.question.id}"].initial = json.loads(
-                                answer.value.replace("'", '"')
+                            self.fields[
+                                f"criteria_{answer.question.id}"
+                            ].initial = json.loads(
+                                answer.value.replace("'", '"'),
                             )
                         else:
-                            self.fields[f"criteria_{answer.question.id}"].initial = answer.value
+                            self.fields[
+                                f"criteria_{answer.question.id}"
+                            ].initial = answer.value
 
-            else:
-                if answer.value:
-                    if answer.question.multiple_answers is True:
-                        self.fields[f"criteria_{answer.question.id}"].initial = json.loads(
-                            answer.value.replace("'", '"')
-                        )
-                    else:
-                        self.fields[f"criteria_{answer.question.id}"].initial = answer.value
+            elif answer.value:
+                if answer.question.multiple_answers is True:
+                    self.fields[f"criteria_{answer.question.id}"].initial = json.loads(
+                        answer.value.replace("'", '"'),
+                    )
+                else:
+                    self.fields[f"criteria_{answer.question.id}"].initial = answer.value

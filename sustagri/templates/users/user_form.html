@@ -1,28 +1,23 @@
 {% extends "base.html" %}
+
 {% load i18n %}
 {% load tailwind_filters %}
 
 {% block title %}
   {% translate "Edit profile" %}
 {% endblock title %}
-
 {% block content %}
-<section class="mx-auto max-w-md">
-  <h1 class="mb-6 text-center">
-    {% translate "Edit profile" %}
-  </h1>
-
-  <form id="user-update-form" method="post" action="{% url 'users:update' %}">
-    {% csrf_token %}
-    {{ form|crispy }}
-
-    <div class="mt-6 flex justify-center">
-      {% include "partials/buttons.html#btn-submit" with id="update-profile-button" label="Save" form_id="user-update-form" class="wizard-btn" %}
+  <section class="mx-auto max-w-md">
+    <h1 class="mb-6 text-center">{% translate "Edit profile" %}</h1>
+    <form id="user-update-form" method="post" action="{% url 'users:update' %}">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div class="mt-6 flex justify-center">
+        {% include "partials/buttons.html#btn-submit" with id="update-profile-button" label="Save" form_id="user-update-form" class="wizard-btn" %}
+      </div>
+    </form>
+    <div class="mt-4 text-center">
+      {% include "partials/buttons.html#btn-link" with label="Back to account" href=user.get_absolute_url class="text-link" %}
     </div>
-  </form>
-
-  <div class="mt-4 text-center">
-    {% include "partials/buttons.html#btn-link" with label="Back to account" href=user.get_absolute_url class="text-link" %}
-  </div>
-</section>
+  </section>
 {% endblock content %}

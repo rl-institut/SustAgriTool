@@ -1,5 +1,9 @@
-from django.urls import path, re_path
-from .views import *
+from django.urls import path
+
+from .views import project_create
+from .views import project_delete
+from .views import project_duplicate
+from .views import projects_list
 
 app_name = "projects"
 
@@ -11,4 +15,4 @@ urlpatterns = [
     path("create", project_create, name="project_create"),
     path("duplicate/<int:proj_id>", project_duplicate, name="project_duplicate"),
     path("delete/<int:proj_id>", project_delete, name="project_delete"),
-    ]
+]

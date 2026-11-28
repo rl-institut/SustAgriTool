@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class StepsConfig(AppConfig):
-    name = 'sustagri.steps'
+    name = "sustagri.steps"

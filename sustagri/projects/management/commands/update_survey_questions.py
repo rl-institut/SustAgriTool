@@ -1,8 +1,15 @@
 import json
+import logging
+
 from django.core.management.base import BaseCommand
 
-from sustagri.projects.models import (SurveyQuestion, SurveyAnswer)
-from sustagri.steps.survey import SURVEY_STRUCTURE, TYPE_STRING, SUB_QUESTION_MAPPING
+from sustagri.projects.models import SurveyAnswer
+from sustagri.projects.models import SurveyQuestion
+from sustagri.steps.survey import SUB_QUESTION_MAPPING
+from sustagri.steps.survey import SURVEY_STRUCTURE
+from sustagri.steps.survey import TYPE_STRING
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -10,13 +17,17 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--update", action="store_true", help="Update survey questions"
+            "--update",
+            action="store_true",
+            help="Update survey questions",
         )
         parser.add_argument(
-            "--dev", action="store_true", help="Remove the survey answers"
+            "--dev",
+            action="store_true",
+            help="Remove the survey answers",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: C901
         update_assets = options["update"]
         remove_answers = options["dev"]
 
@@ -33,7 +44,7 @@ class Command(BaseCommand):
 
             if question_id in SUB_QUESTION_MAPPING:
                 asset_params["subquestion_to"] = SurveyQuestion.objects.get(
-                    question_id=SUB_QUESTION_MAPPING[question_id][0]
+                    question_id=SUB_QUESTION_MAPPING[question_id][0],
                 )
 
             display_type = asset_params.pop("display_type", None)
@@ -56,15 +67,12 @@ class Command(BaseCommand):
             # TODO add the categories here
 
             if qs.exists() is False:
-                print("Create", asset_params)
+                logger.debug("Create: %s", asset_params)
                 new_asset = SurveyQuestion(**asset_params)
                 new_asset.save()
 
-            else:
-                if update_assets is True:
-                    asset = qs.get()
-                    print("Update", asset.__dict__)
-                    qs.update(**asset_params)
-                    # print(asset)
-                    print("To", asset_params)
-        # import pdb;pdb.set_trace()
+            elif update_assets is True:
+                asset = qs.get()
+                logger.debug("Update: %s", asset.__dict__)
+                qs.update(**asset_params)
+                logger.debug("To: %s", asset_params)

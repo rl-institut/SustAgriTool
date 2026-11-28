@@ -1,6 +1,13 @@
 from django.urls import path
 
-from .views import *
+from .views import agroforestry_practices
+from .views import business_models
+from .views import example_case_studies
+from .views import project_information
+from .views import relevant_policies
+from .views import site_conditions
+from .views import steps
+from .views import survey
 
 app_name = "steps"
 
@@ -10,28 +17,24 @@ urlpatterns = [
         steps,
         name="ogp_steps",
     ),
-
     path(
         "project_information/<int:proj_id>",
         project_information,
         name="project_information",
     ),
-
     path(
         "site_conditions/<int:proj_id>",
         site_conditions,
         name="site_conditions",
     ),
-
     path("<int:proj_id>/survey", survey, name="survey"),
     path("<int:proj_id>/submit/survey", survey, name="submit_survey"),
     path("<int:proj_id>/view/survey", survey, name="view_survey"),
-
     path(
         "agroforestry_practices/<int:proj_id>",
         agroforestry_practices,
         name="agroforestry_practices",
-        ),
+    ),
     path(
         "relevant_policies/<int:proj_id>",
         relevant_policies,

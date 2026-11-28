@@ -1,4 +1,4 @@
-# Changelog
+~~# Changelog
 ## [Unreleased]
 
 ### Added
@@ -17,7 +17,7 @@
 
 ### Removed
 
-## [Unreleased]
+## [Unreleased]F
 
 ### Added
 
@@ -71,7 +71,7 @@
 - Set up management file to populate the survey model from the structure
 - Create form, view and template for the example survey questions
 
-### Changed
+###~~ Changed
 
 ### Fixed
 
